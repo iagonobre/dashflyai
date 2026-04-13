@@ -157,12 +157,19 @@ export default function OnboardingPage() {
   const shippingAI = useStreamingContent();
   const faqAI = useStreamingContent();
 
-  // If already has subscription and hasn't started the flow, redirect to dashboard
+  // Only redirect if AI is fully activated — subscription alone doesn't mean onboarding is done
   useEffect(() => {
-    if (!loadingSubscription && subscription && step === 0) {
+    if (!loadingSubscription && !loadingSettings && settings?.isActive && step === 0) {
       router.replace("/");
     }
-  }, [loadingSubscription, subscription, step, router]);
+  }, [loadingSubscription, loadingSettings, settings?.isActive, step, router]);
+
+  // Skip plan step if subscription already exists (e.g. user refreshed mid-onboarding)
+  useEffect(() => {
+    if (!loadingSubscription && subscription && !settings?.isActive && step === 0) {
+      setStep(1);
+    }
+  }, [loadingSubscription, subscription, settings?.isActive, step]);
 
   // Initialize policy fields from saved settings when they load
   useEffect(() => {
@@ -289,7 +296,7 @@ export default function OnboardingPage() {
   }
 
   // Mostra spinner enquanto carrega OU enquanto tem subscription em step 0 (evita piscar antes do redirect)
-  if (loadingSubscription || loadingSettings || loadingEmails || (subscription && step === 0)) {
+  if (loadingSubscription || loadingSettings || loadingEmails || (settings?.isActive && step === 0)) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <Spinner size="md" />

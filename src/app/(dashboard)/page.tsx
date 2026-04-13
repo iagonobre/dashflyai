@@ -105,12 +105,10 @@ export default function OverviewPage() {
 
   const hasUnconfiguredForwarding =
     !loadingSettings &&
-    !!settings?.isActive &&
-    inboundEmails.some((e) => e.forwardingStatus === null);
+    inboundEmails.some((e) => e.forwardingStatus !== "configured");
 
   const hasSpfNotVerified =
     !loadingSettings &&
-    !!settings?.isActive &&
     inboundEmails.length > 0 &&
     inboundEmails.some((e) => !e.spfVerified);
 
