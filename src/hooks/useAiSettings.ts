@@ -15,6 +15,9 @@ export type InboundEmail = {
   forwardingStatus: ForwardingStatus;
   forwardingConfiguredAt: string | null;
   forwardingVerificationSentAt: string | null;
+  providerVerificationSubject: string | null;
+  providerVerificationBody: string | null;
+  providerVerificationHtml: string | null;
   spfVerified: boolean;
   dkimVerified: boolean;
   dnsCheckedAt: string | null;

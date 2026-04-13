@@ -209,6 +209,9 @@ export default function InboundEmailsManager({
                         provider={email.forwardingProvider}
                         configuredAt={email.forwardingConfiguredAt}
                         verificationSentAt={email.forwardingVerificationSentAt}
+                        providerVerificationSubject={email.providerVerificationSubject}
+                        providerVerificationBody={email.providerVerificationBody}
+                        providerVerificationHtml={email.providerVerificationHtml}
                         onOAuthConnect={(provider) => onForwardingOAuth(email.id, provider)}
                         onStartVerification={() => onForwardingStartVerification?.(email.id)}
                         isConnecting={isForwardingConnecting}

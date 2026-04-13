@@ -9,6 +9,7 @@ import {
   Copy01Icon,
   RefreshIcon,
   ArrowRight01Icon,
+  AlertCircleIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
@@ -22,6 +23,9 @@ interface Props {
   provider: "gmail" | "microsoft" | "manual" | null;
   configuredAt: string | null;
   verificationSentAt?: string | null;
+  providerVerificationSubject?: string | null;
+  providerVerificationBody?: string | null;
+  providerVerificationHtml?: string | null;
   onOAuthConnect: (provider: "gmail" | "microsoft") => void;
   onStartVerification: () => void;
   isConnecting?: boolean;
@@ -124,6 +128,9 @@ export default function ForwardingSetup({
   provider,
   configuredAt,
   verificationSentAt,
+  providerVerificationSubject,
+  providerVerificationBody,
+  providerVerificationHtml,
   onOAuthConnect,
   onStartVerification,
   isConnecting = false,
@@ -208,6 +215,47 @@ export default function ForwardingSetup({
 
     return (
       <div className="flex flex-col gap-6">
+        {/* Email de verificação do provedor (Zoho, GoDaddy, Titan, etc.) */}
+        {providerVerificationSubject && (
+          <div className="border border-yellowAlert/30 bg-yellowAlert/5 rounded-xl overflow-hidden flex flex-col">
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-yellowAlert/20">
+              <HugeiconsIcon icon={AlertCircleIcon} size={14} className="text-yellowAlert shrink-0" />
+              <p className="text-yellowAlert text-xs font-medium">Email de verificação recebido do seu provedor</p>
+            </div>
+            <div className="px-4 py-2.5 border-b border-yellowAlert/10">
+              <p className="text-darkText text-[11px] uppercase tracking-wider mb-0.5">Assunto</p>
+              <p className="text-textLight text-sm">{providerVerificationSubject}</p>
+            </div>
+            <div className="px-4 py-2.5">
+              <p className="text-darkText text-[11px] uppercase tracking-wider mb-1.5">Conteúdo</p>
+              {providerVerificationHtml ? (
+                <iframe
+                  srcDoc={providerVerificationHtml}
+                  sandbox=""
+                  className="w-full rounded-lg border border-yellowAlert/20 bg-white"
+                  style={{ minHeight: 220 }}
+                  onLoad={(e) => {
+                    const iframe = e.currentTarget;
+                    try {
+                      iframe.style.height =
+                        (iframe.contentDocument?.body?.scrollHeight ?? 220) + 32 + "px";
+                    } catch {}
+                  }}
+                />
+              ) : (
+                <pre className="text-darkText text-xs leading-relaxed whitespace-pre-wrap font-sans bg-container rounded-lg p-3 border border-yellowAlert/10">
+                  {providerVerificationBody}
+                </pre>
+              )}
+            </div>
+            <div className="px-4 py-2.5 border-t border-yellowAlert/10">
+              <p className="text-darkText text-xs leading-relaxed">
+                Leia o email acima, copie o código ou clique no link de verificação e siga as instruções do seu provedor.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Intro */}
         <p className="text-textLight text-sm leading-relaxed">
           {isOAuth

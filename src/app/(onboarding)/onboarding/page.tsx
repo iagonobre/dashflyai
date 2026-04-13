@@ -415,6 +415,9 @@ export default function OnboardingPage() {
                 provider={inboundEmails[0]?.forwardingProvider ?? null}
                 configuredAt={inboundEmails[0]?.forwardingConfiguredAt ?? null}
                 verificationSentAt={inboundEmails[0]?.forwardingVerificationSentAt ?? null}
+                providerVerificationSubject={inboundEmails[0]?.providerVerificationSubject ?? null}
+                providerVerificationBody={inboundEmails[0]?.providerVerificationBody ?? null}
+                providerVerificationHtml={inboundEmails[0]?.providerVerificationHtml ?? null}
                 onOAuthConnect={handleOAuthConnect}
                 onStartVerification={() =>
                   sendVerification.mutate(inboundEmails[0]?.id ?? "", { onSuccess: next })
