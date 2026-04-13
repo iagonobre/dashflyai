@@ -8,8 +8,13 @@ export const subscriptionService = {
   },
 
   getSubscription: async (storeId: string): Promise<AiStoreSubscription | null> => {
-    const res = await api.get(`/stores/${storeId}/ai/subscription`);
-    return res.data;
+    try {
+      const res = await api.get(`/stores/${storeId}/ai/subscription`);
+      return res.data ?? null;
+    } catch {
+      // 403/404 = no active AI subscription for this store
+      return null;
+    }
   },
 
   subscribe: async (storeId: string, planId: string): Promise<StartTrialResponse> => {

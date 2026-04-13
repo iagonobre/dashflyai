@@ -14,4 +14,5 @@ export type Store = {
   id: string;
   name: string;
   url: string;
+  status?: string;
 };

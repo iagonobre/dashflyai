@@ -13,9 +13,16 @@ export default function SubscriptionBannerWrapper() {
   const router = useRouter();
 
   useEffect(() => {
-    // Wait for auth to resolve and the query to finish before redirecting
-    if (authLoading || !storeId || isLoading) return;
-    if (subscription === null || subscription === undefined) {
+    // Wait for auth to resolve before redirecting
+    if (authLoading) return;
+    // No active store = redirect to onboarding
+    if (!storeId) {
+      router.replace("/onboarding");
+      return;
+    }
+    // Wait for subscription query to finish
+    if (isLoading) return;
+    if (!subscription) {
       router.replace("/onboarding");
     }
   }, [authLoading, storeId, isLoading, subscription, router]);

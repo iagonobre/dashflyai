@@ -23,7 +23,7 @@ export default function StoreSwitcher() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const stores = user?.stores ?? [];
+  const stores = (user?.stores ?? []).filter((s) => s.status !== "DISCONNECTED");
   const currentStore = stores.find((s) => s.id === storeId) ?? stores[0];
   const hasMultiple = stores.length > 1;
 

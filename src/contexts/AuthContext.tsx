@@ -39,12 +39,15 @@ export default function AuthProvider({
       const parsed: User = JSON.parse(savedUser);
       setUser(parsed);
 
-      // Validate that savedStoreId belongs to this user's stores
+      // Only consider active (non-disconnected) stores
+      const activeStores = parsed.stores?.filter((s) => s.status !== "DISCONNECTED") ?? [];
+
+      // Validate that savedStoreId belongs to this user's active stores
       const storeIsValid =
-        savedStoreId && parsed.stores?.some((s) => s.id === savedStoreId);
+        savedStoreId && activeStores.some((s) => s.id === savedStoreId);
       const resolvedStoreId = storeIsValid
         ? savedStoreId
-        : parsed.stores?.[0]?.id ?? null;
+        : activeStores[0]?.id ?? null;
 
       setStoreIdState(resolvedStoreId);
       if (resolvedStoreId && resolvedStoreId !== savedStoreId) {
@@ -59,11 +62,14 @@ export default function AuthProvider({
 
         // Re-validate after fresh profile — covers token reuse across accounts
         const currentStoreId = localStorage.getItem("selectedStoreId");
-        const stillValid = res.data.stores?.some(
+        const activeStores = res.data.stores?.filter(
+          (s: { id: string; status?: string }) => s.status !== "DISCONNECTED"
+        ) ?? [];
+        const stillValid = activeStores.some(
           (s: { id: string }) => s.id === currentStoreId
         );
-        if (!stillValid && res.data.stores?.length > 0) {
-          setStoreId(res.data.stores[0].id);
+        if (!stillValid && activeStores.length > 0) {
+          setStoreId(activeStores[0].id);
         }
       })
       .catch(() => {
