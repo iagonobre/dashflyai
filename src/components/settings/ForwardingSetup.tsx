@@ -478,12 +478,26 @@ export default function ForwardingSetup({
               </div>
             )}
 
-            {/* Email de verificação do provedor (Zoho envia ANTES de confirmar) */}
+            {/* Estado: aguardando email de verificação */}
+            {!providerVerificationSubject && (
+              <div className="px-4 py-3 border-t border-border flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0 animate-pulse" />
+                <div>
+                  <p className="text-textLight text-xs font-medium">Aguardando email de verificação</p>
+                  <p className="text-darkText text-xs mt-0.5 leading-relaxed">
+                    Após colar o endereço no seu provedor, ele enviará um email com um código para cá.
+                    Ele aparecerá aqui automaticamente — não precisa sair desta página.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Email de verificação recebido */}
             {providerVerificationSubject && (
               <div className="border-t border-yellowAlert/20 bg-yellowAlert/5 flex flex-col">
                 <div className="flex items-center gap-2 px-4 py-2.5 border-b border-yellowAlert/10">
                   <HugeiconsIcon icon={AlertCircleIcon} size={13} className="text-yellowAlert shrink-0" />
-                  <p className="text-yellowAlert text-xs font-medium">Email de verificação recebido do seu provedor</p>
+                  <p className="text-yellowAlert text-xs font-medium">Email de verificação recebido — siga as instruções abaixo</p>
                 </div>
                 <div className="px-4 py-2 border-b border-yellowAlert/10">
                   <p className="text-darkText text-[10px] uppercase tracking-wider mb-0.5">Assunto</p>
@@ -511,31 +525,29 @@ export default function ForwardingSetup({
                     </pre>
                   )}
                 </div>
-                <div className="px-4 py-2 border-t border-yellowAlert/10">
-                  <p className="text-darkText text-xs">Copie o código ou clique no link acima e siga as instruções do seu provedor. Depois clique em "Já configurei".</p>
+                <div className="px-4 py-2.5 border-t border-yellowAlert/10 flex items-center justify-between gap-3">
+                  <p className="text-darkText text-xs leading-relaxed">
+                    Copie o código ou clique no link acima, conclua no painel do seu provedor e depois clique em verificar.
+                  </p>
+                  <button
+                    onClick={onStartVerification}
+                    disabled={isSendingVerification}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium
+                      text-white bg-primary hover:bg-primaryHover rounded-md transition-colors
+                      disabled:opacity-60 shrink-0"
+                  >
+                    {isSendingVerification ? (
+                      <Spinner size="sm" />
+                    ) : (
+                      <>
+                        Concluí — verificar
+                        <HugeiconsIcon icon={ArrowRight01Icon} size={13} />
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
             )}
-
-            {/* Rodapé */}
-            <div className="px-4 py-2.5 flex items-center justify-end">
-              <button
-                onClick={onStartVerification}
-                disabled={isSendingVerification}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium
-                  text-white bg-primary hover:bg-primaryHover rounded-md transition-colors
-                  disabled:opacity-60"
-              >
-                {isSendingVerification ? (
-                  <Spinner size="sm" />
-                ) : (
-                  <>
-                    Já configurei — verificar
-                    <HugeiconsIcon icon={ArrowRight01Icon} size={14} />
-                  </>
-                )}
-              </button>
-            </div>
           </div>
         </div>
 
