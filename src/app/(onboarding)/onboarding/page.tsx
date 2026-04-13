@@ -130,12 +130,14 @@ function PlanOption({
 }
 
 export default function OnboardingPage() {
-  const { storeId } = useAuth();
+  const { user, storeId, setStoreId } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [trialDays, setTrialDays] = useState<number | null>(null);
   const [savedIdentity, setSavedIdentity] = useState<IdentityForm | null>(null);
+
+  const activeStores = user?.stores ?? [];
 
   const { data: subscription, isLoading: loadingSubscription } = useAiSubscription(storeId);
   const { data: settings, isLoading: loadingSettings } = useAiSettings(storeId);
@@ -245,6 +247,43 @@ export default function OnboardingPage() {
 
   function finish() {
     router.push("/");
+  }
+
+  // Store selection — shown when user has multiple stores and none is active yet
+  if (user && !storeId && activeStores.length > 1) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md bg-container border border-border rounded-2xl p-8 flex flex-col gap-6">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-8 h-8 rounded-lg bg-primary/20 border border-primaryStroke/30 flex items-center justify-center">
+              <HugeiconsIcon icon={SparklesIcon} size={16} className="text-lightPrimary" />
+            </div>
+            <p className="text-darkText text-xs">Configuração inicial</p>
+          </div>
+          <div>
+            <h2 className="text-white text-xl font-semibold">Para qual loja você quer configurar?</h2>
+            <p className="text-darkText text-sm mt-2 leading-relaxed">
+              Escolha a loja que o assistente vai atender. Você pode configurar as demais depois.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            {activeStores.map((store) => (
+              <button
+                key={store.id}
+                onClick={() => setStoreId(store.id)}
+                className="w-full text-left border border-border bg-background hover:border-primaryStroke
+                  hover:bg-primary/5 rounded-xl px-4 py-3 transition-all"
+              >
+                <p className="text-white text-sm font-medium">{store.name}</p>
+                {store.url && (
+                  <p className="text-darkText text-xs mt-0.5">{store.url}</p>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Mostra spinner enquanto carrega OU enquanto tem subscription em step 0 (evita piscar antes do redirect)
@@ -378,6 +417,7 @@ export default function OnboardingPage() {
                 isAdding={addEmail.isPending}
                 isDeleting={deleteEmail.isPending}
                 defaultFormOpen
+                hideForwardingStatus
               />
 
               <div className="flex items-center justify-between pt-2">

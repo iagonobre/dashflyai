@@ -39,6 +39,8 @@ interface Props {
   onForwardingStartVerification?: (id: string) => void;
   isForwardingConnecting?: boolean;
   isSendingVerification?: boolean;
+  maxEmails?: number;
+  hideForwardingStatus?: boolean;
 }
 
 
@@ -89,6 +91,8 @@ export default function InboundEmailsManager({
   onForwardingStartVerification,
   isForwardingConnecting = false,
   isSendingVerification = false,
+  maxEmails = 1,
+  hideForwardingStatus = false,
 }: Props) {
   const [showForm, setShowForm] = useState(defaultFormOpen);
 
@@ -176,12 +180,14 @@ export default function InboundEmailsManager({
                             <HugeiconsIcon icon={Copy01Icon} size={12} />
                           </button>
                         </div>
-                        <div className="mt-1.5">
-                          <ForwardingStatusBadge
-                            status={email.forwardingStatus}
-                            provider={email.forwardingProvider}
-                          />
-                        </div>
+                        {!hideForwardingStatus && (
+                          <div className="mt-1.5">
+                            <ForwardingStatusBadge
+                              status={email.forwardingStatus}
+                              provider={email.forwardingProvider}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 mt-0.5">
@@ -222,14 +228,16 @@ export default function InboundEmailsManager({
                 </div>
               ))}
 
-              <button
-                onClick={() => setShowForm(!showForm)}
-                className="flex items-center gap-2 text-sm text-darkText hover:text-white
-                  transition-colors self-start"
-              >
-                <HugeiconsIcon icon={Add01Icon} size={14} />
-                Adicionar outro email
-              </button>
+              {emails.length < maxEmails && (
+                <button
+                  onClick={() => setShowForm(!showForm)}
+                  className="flex items-center gap-2 text-sm text-darkText hover:text-white
+                    transition-colors self-start"
+                >
+                  <HugeiconsIcon icon={Add01Icon} size={14} />
+                  Adicionar outro email
+                </button>
+              )}
             </div>
           )}
 

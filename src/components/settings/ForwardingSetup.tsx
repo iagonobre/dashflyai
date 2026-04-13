@@ -478,6 +478,45 @@ export default function ForwardingSetup({
               </div>
             )}
 
+            {/* Email de verificação do provedor (Zoho envia ANTES de confirmar) */}
+            {providerVerificationSubject && (
+              <div className="border-t border-yellowAlert/20 bg-yellowAlert/5 flex flex-col">
+                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-yellowAlert/10">
+                  <HugeiconsIcon icon={AlertCircleIcon} size={13} className="text-yellowAlert shrink-0" />
+                  <p className="text-yellowAlert text-xs font-medium">Email de verificação recebido do seu provedor</p>
+                </div>
+                <div className="px-4 py-2 border-b border-yellowAlert/10">
+                  <p className="text-darkText text-[10px] uppercase tracking-wider mb-0.5">Assunto</p>
+                  <p className="text-textLight text-xs">{providerVerificationSubject}</p>
+                </div>
+                <div className="px-4 py-2.5">
+                  <p className="text-darkText text-[10px] uppercase tracking-wider mb-1.5">Conteúdo</p>
+                  {providerVerificationHtml ? (
+                    <iframe
+                      srcDoc={providerVerificationHtml}
+                      sandbox=""
+                      className="w-full rounded-lg border border-yellowAlert/20 bg-white"
+                      style={{ minHeight: 200 }}
+                      onLoad={(e) => {
+                        const iframe = e.currentTarget;
+                        try {
+                          iframe.style.height =
+                            (iframe.contentDocument?.body?.scrollHeight ?? 200) + 32 + "px";
+                        } catch {}
+                      }}
+                    />
+                  ) : (
+                    <pre className="text-darkText text-xs leading-relaxed whitespace-pre-wrap font-sans bg-container rounded-lg p-3 border border-yellowAlert/10">
+                      {providerVerificationBody}
+                    </pre>
+                  )}
+                </div>
+                <div className="px-4 py-2 border-t border-yellowAlert/10">
+                  <p className="text-darkText text-xs">Copie o código ou clique no link acima e siga as instruções do seu provedor. Depois clique em "Já configurei".</p>
+                </div>
+              </div>
+            )}
+
             {/* Rodapé */}
             <div className="px-4 py-2.5 flex items-center justify-end">
               <button

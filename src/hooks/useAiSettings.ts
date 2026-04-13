@@ -67,10 +67,11 @@ export function useInboundEmails(storeId: string | null) {
     enabled: !!storeId,
     refetchInterval: (query) => {
       const data = query.state.data;
-      if (data?.some((e) => e.forwardingStatus === "awaiting_confirmation")) {
-        return 5000;
-      }
-      return false;
+      // Poll whenever forwarding is not yet fully configured:
+      // - awaiting_confirmation: waiting for our own verification token
+      // - not configured: provider may have already sent a verification email we haven't shown yet
+      const needsPolling = data?.some((e) => e.forwardingStatus !== "configured");
+      return needsPolling ? 5000 : false;
     },
   });
 }
