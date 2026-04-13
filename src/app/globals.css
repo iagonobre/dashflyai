@@ -1,0 +1,71 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --font-syne: var(--font-syne), sans-serif;
+
+  /* Containers & Box */
+  --color-background: #111116;
+  --color-container: #16161b;
+  --color-containerHover: #1b1b20;
+  --color-secondaryContainer: #100f16;
+  --color-secondaryContainerHover: #15141b;
+  --color-border: #1f1f24;
+
+  /* Landing Page */
+  --color-landingBackground: #030014;
+  --color-landingText: #efedfd99;
+  --color-landingDarkText: #d9d5fd;
+  --color-landingStroke: #5f5380;
+  --color-landingPrimary: #220841;
+
+  /* Brand */
+  --color-primary: #6b1bad;
+  --color-lightPrimary: #b084e1;
+  --color-primaryHover: #8122c2;
+  --color-primaryStroke: #71578d;
+
+  /* Textos */
+  --color-darkText: #a4a4b2;
+  --color-textHover: #b8b8c6;
+  --color-textLight: #d0d0e1;
+  --color-primaryText: #975fc6;
+  --color-lightPrimaryText: #b084e1;
+
+  /* Alertas */
+  --color-greenAlert: #06d679;
+  --color-redAlert: #ea4335;
+  --color-yellowAlert: #fbbc04;
+  --color-blueAlert: #4285f4;
+
+  --animate-spinner: spinner 1s linear infinite;
+
+  @keyframes spinner {
+    0%   { opacity: 0.85; }
+    50%  { opacity: 0.25; }
+    100% { opacity: 0.25; }
+  }
+}
+
+* {
+  --font-inter: "Inter", sans-serif;
+  --font-syne: "Syne", sans-serif;
+  scrollbar-color: auto;
+  scrollbar-width: auto;
+}
+
+button:disabled { cursor: not-allowed; }
+button, a { cursor: pointer; }
+body { font-family: var(--font-inter); }
+
+::-webkit-scrollbar { margin-right: 0.5rem; height: 0.25rem; width: 0.45rem; }
+::-webkit-scrollbar-corner { background-image: none; border-style: none; }
+::-webkit-scrollbar-thumb { cursor: move; border-radius: 0.625rem; background-color: var(--color-border); }
+::-webkit-scrollbar-track { border-style: none; background-color: transparent; }
+
+/* Autofill fix para inputs escuros */
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 900px #16161b inset !important;
+  -webkit-text-fill-color: white !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
