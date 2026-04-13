@@ -36,13 +36,19 @@ interface Props {
   isDeleting: boolean;
   defaultFormOpen?: boolean;
   onForwardingOAuth?: (id: string, provider: "gmail" | "microsoft") => void;
-  onForwardingConfirmManual?: (id: string) => void;
+  onForwardingStartVerification?: (id: string) => void;
   isForwardingConnecting?: boolean;
-  isForwardingConfirming?: boolean;
+  isSendingVerification?: boolean;
 }
 
 
-function ForwardingStatusBadge({ status }: { status: string | null }) {
+function ForwardingStatusBadge({
+  status,
+  provider,
+}: {
+  status: string | null;
+  provider: string | null;
+}) {
   if (status === "configured") {
     return (
       <span className="flex items-center gap-1 text-greenAlert text-[11px]">
@@ -52,10 +58,14 @@ function ForwardingStatusBadge({ status }: { status: string | null }) {
     );
   }
   if (status === "awaiting_confirmation") {
+    const label =
+      provider === "gmail" || provider === "microsoft"
+        ? "Aguardando confirmação do Google"
+        : "Verificando encaminhamento...";
     return (
       <span className="flex items-center gap-1 text-yellowAlert text-[11px]">
         <HugeiconsIcon icon={Clock01Icon} size={11} />
-        Aguardando confirmação do Google
+        {label}
       </span>
     );
   }
@@ -76,9 +86,9 @@ export default function InboundEmailsManager({
   isDeleting,
   defaultFormOpen = false,
   onForwardingOAuth,
-  onForwardingConfirmManual,
+  onForwardingStartVerification,
   isForwardingConnecting = false,
-  isForwardingConfirming = false,
+  isSendingVerification = false,
 }: Props) {
   const [showForm, setShowForm] = useState(defaultFormOpen);
 
@@ -112,7 +122,7 @@ export default function InboundEmailsManager({
           </div>
           <div>
             <p className="text-textLight text-sm font-medium">Nenhum email conectado</p>
-            <p className="text-darkText text-xs mt-0.5">
+            <p className="text-darkText text-sm mt-0.5">
               Conecte o email da sua loja para o assistente começar a responder seus clientes.
             </p>
           </div>
@@ -167,7 +177,10 @@ export default function InboundEmailsManager({
                           </button>
                         </div>
                         <div className="mt-1.5">
-                          <ForwardingStatusBadge status={email.forwardingStatus} />
+                          <ForwardingStatusBadge
+                            status={email.forwardingStatus}
+                            provider={email.forwardingProvider}
+                          />
                         </div>
                       </div>
                     </div>
@@ -195,10 +208,11 @@ export default function InboundEmailsManager({
                         status={email.forwardingStatus}
                         provider={email.forwardingProvider}
                         configuredAt={email.forwardingConfiguredAt}
+                        verificationSentAt={email.forwardingVerificationSentAt}
                         onOAuthConnect={(provider) => onForwardingOAuth(email.id, provider)}
-                        onConfirmManual={() => onForwardingConfirmManual?.(email.id)}
+                        onStartVerification={() => onForwardingStartVerification?.(email.id)}
                         isConnecting={isForwardingConnecting}
-                        isConfirming={isForwardingConfirming}
+                        isSendingVerification={isSendingVerification}
                       />
                     </div>
                   )}
@@ -222,7 +236,7 @@ export default function InboundEmailsManager({
               className="bg-background border border-border rounded-lg p-4 flex flex-col gap-3">
               <p className="text-textLight text-sm font-medium">Conectar email</p>
               <div className="flex flex-col gap-1.5">
-                <label className="text-darkText text-xs">
+                <label className="text-darkText text-sm">
                   Como você quer chamar este email? (uso interno)
                 </label>
                 <input
@@ -237,7 +251,7 @@ export default function InboundEmailsManager({
                 )}
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-darkText text-xs">
+                <label className="text-darkText text-sm">
                   Email que seus clientes usam para falar com você
                 </label>
                 <input

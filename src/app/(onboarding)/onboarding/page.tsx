@@ -23,19 +23,20 @@ import {
   useDeleteInboundEmail,
 } from "@/hooks/useAiSettings";
 import { useAiPlans, useAiSubscription, useSubscribeAi } from "@/hooks/useSubscription";
-import { useInitForwarding, useConfirmManualForwarding } from "@/hooks/useForwarding";
+import { useInitForwarding, useSendForwardingVerification, useVerifyDns } from "@/hooks/useForwarding";
 import { useStreamingContent } from "@/hooks/useStreamingContent";
 import Toggle from "@/components/ui/Toggle";
 import InboundEmailsManager from "@/components/settings/InboundEmailsManager";
 import ForwardingSetup from "@/components/settings/ForwardingSetup";
+import DnsSettingsSection from "@/components/settings/DnsSettingsSection";
 import Spinner from "@/components/ui/Spinner";
 import { AiSettings } from "@/types/ai-settings.types";
 import { AiPlan } from "@/types/subscription.types";
 import { cn } from "@/lib/utils";
 
 // Step 7 = success screen, shown without step indicator
-const TOTAL_STEPS = 8;
-const SUCCESS_STEP = 7;
+const TOTAL_STEPS = 9;
+const SUCCESS_STEP = 8;
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -145,7 +146,8 @@ export default function OnboardingPage() {
   const { data: plans = [], isLoading: loadingPlans } = useAiPlans();
   const subscribe = useSubscribeAi(storeId);
   const initForwarding = useInitForwarding(storeId);
-  const confirmManualForwarding = useConfirmManualForwarding(storeId);
+  const sendVerification = useSendForwardingVerification(storeId);
+  const verifyDns = useVerifyDns(storeId);
 
   const exchangeAI = useStreamingContent();
   const shippingAI = useStreamingContent();
@@ -181,8 +183,8 @@ export default function OnboardingPage() {
   function next() {
     setStep((s) => {
       const n = s + 1;
-      // Skip forwarding step (2) if plan doesn't have email feature
-      if (n === 2 && !hasEmailFeature) return 3;
+      // Skip forwarding (2) and domain (3) if plan doesn't have email feature
+      if ((n === 2 || n === 3) && !hasEmailFeature) return 4;
       return Math.min(n, TOTAL_STEPS - 1);
     });
   }
@@ -190,7 +192,7 @@ export default function OnboardingPage() {
   function back() {
     setStep((s) => {
       const p = s - 1;
-      if (p === 2 && !hasEmailFeature) return 1;
+      if ((p === 2 || p === 3) && !hasEmailFeature) return 1;
       return Math.max(p, 0);
     });
   }
@@ -279,10 +281,10 @@ export default function OnboardingPage() {
 
   // Visible steps count (excluding success screen)
   // If no email feature, steps 1 (email) and 2 (forwarding) merge into 1 skip
-  const visibleSteps = hasEmailFeature ? TOTAL_STEPS - 1 : TOTAL_STEPS - 3;
+  const visibleSteps = hasEmailFeature ? TOTAL_STEPS - 1 : TOTAL_STEPS - 4;
   // Map real step to display index
   function displayIndex(s: number) {
-    if (!hasEmailFeature && s > 2) return s - 2;
+    if (!hasEmailFeature && s > 3) return s - 3;
     return s;
   }
 
@@ -364,7 +366,7 @@ export default function OnboardingPage() {
                   Qual email seus clientes usam para falar com você?
                 </h2>
                 <p className="text-darkText text-sm mt-2 leading-relaxed">
-                  O Dashfly AI vai ler e responder as mensagens que chegarem nesse endereço.
+                  A Dashfly AI vai ler e responder as mensagens que chegarem nesse endereço.
                 </p>
               </div>
 
@@ -412,12 +414,13 @@ export default function OnboardingPage() {
                 status={inboundEmails[0]?.forwardingStatus ?? null}
                 provider={inboundEmails[0]?.forwardingProvider ?? null}
                 configuredAt={inboundEmails[0]?.forwardingConfiguredAt ?? null}
+                verificationSentAt={inboundEmails[0]?.forwardingVerificationSentAt ?? null}
                 onOAuthConnect={handleOAuthConnect}
-                onConfirmManual={() =>
-                  confirmManualForwarding.mutate(undefined, { onSuccess: next })
+                onStartVerification={() =>
+                  sendVerification.mutate(inboundEmails[0]?.id ?? "", { onSuccess: next })
                 }
                 isConnecting={initForwarding.isPending}
-                isConfirming={confirmManualForwarding.isPending}
+                isSendingVerification={sendVerification.isPending}
               />
 
               <div className="flex items-center justify-between pt-2">
@@ -448,8 +451,54 @@ export default function OnboardingPage() {
             </>
           )}
 
-          {/* ── STEP 3 — Comportamento ── */}
+          {/* ── STEP 3 — Domínio ── */}
           {step === 3 && (
+            <>
+              <div>
+                <h2 className="text-white text-xl font-semibold">
+                  Configure seu domínio
+                </h2>
+                <p className="text-darkText text-sm mt-2 leading-relaxed">
+                  Adicione dois registros DNS para que as respostas do assistente não caiam no spam dos seus clientes.
+                </p>
+              </div>
+
+              <DnsSettingsSection
+                emails={inboundEmails}
+                onVerifyDns={() => verifyDns.mutate()}
+                isVerifying={verifyDns.isPending}
+              />
+
+              <div className="flex items-center justify-between pt-2">
+                <button
+                  onClick={back}
+                  className="flex items-center gap-1.5 text-darkText text-sm hover:text-textLight transition-colors"
+                >
+                  <HugeiconsIcon icon={ArrowLeft01Icon} size={15} />
+                  Voltar
+                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={next}
+                    className="text-darkText text-sm hover:text-textLight transition-colors"
+                  >
+                    Configurar depois
+                  </button>
+                  <button
+                    onClick={next}
+                    className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white
+                      bg-primary hover:bg-primaryHover rounded-xl transition-colors"
+                  >
+                    Próximo
+                    <HugeiconsIcon icon={ArrowRight01Icon} size={15} />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* ── STEP 4 — Comportamento ── */}
+          {step === 4 && (
             <>
               <div>
                 <h2 className="text-white text-xl font-semibold">
@@ -499,8 +548,8 @@ export default function OnboardingPage() {
             </>
           )}
 
-          {/* ── STEP 4 — Identidade ── */}
-          {step === 4 && (
+          {/* ── STEP 5 — Identidade ── */}
+          {step === 5 && (
             <form onSubmit={handleSubmit(handleIdentitySubmit)} className="flex flex-col gap-6">
               <div>
                 <h2 className="text-white text-xl font-semibold">Como se chama o seu assistente?</h2>
@@ -579,8 +628,8 @@ export default function OnboardingPage() {
             </form>
           )}
 
-          {/* ── STEP 5 — Políticas e FAQ ── */}
-          {step === 5 && (
+          {/* ── STEP 6 — Políticas e FAQ ── */}
+          {step === 6 && (
             <>
               <div>
                 <h2 className="text-white text-xl font-semibold">
@@ -758,8 +807,8 @@ export default function OnboardingPage() {
             </>
           )}
 
-          {/* ── STEP 6 — Resumo ── */}
-          {step === 6 && (
+          {/* ── STEP 7 — Resumo ── */}
+          {step === 7 && (
             <>
               <div>
                 <h2 className="text-white text-xl font-semibold">Tudo certo por aqui?</h2>
@@ -891,7 +940,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <p className="text-darkText text-sm leading-relaxed max-w-sm">
-                  O Dashfly AI está configurado e pronto para trabalhar. Nenhum valor será cobrado agora
+                  A Dashfly AI está configurada e pronta para trabalhar. Nenhum valor será cobrado agora
                   — a cobrança começa apenas após o período de teste.
                 </p>
 

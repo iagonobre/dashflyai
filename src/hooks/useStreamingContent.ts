@@ -15,7 +15,7 @@ export function useStreamingContent() {
 
   const abortRef = useRef<AbortController | null>(null);
 
-  const stream = useCallback(async (url: string, initialText?: string) => {
+  const stream = useCallback(async (url: string, initialText?: string, body?: Record<string, unknown>) => {
     // Cancela stream anterior se houver
     if (abortRef.current) {
       abortRef.current.abort();
@@ -34,6 +34,7 @@ export function useStreamingContent() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${getCookieToken()}`,
         },
+        body: body ? JSON.stringify(body) : undefined,
         signal: controller.signal,
       });
 
@@ -56,9 +57,9 @@ export function useStreamingContent() {
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
-            const data = line.slice(6).trim();
-            if (data === "[DONE]") break;
-            accumulated += data;
+            const data = line.slice(6);
+            if (data.trim() === "[DONE]") break;
+            try { accumulated += JSON.parse(data); } catch { accumulated += data; }
             setState((prev) => ({ ...prev, text: accumulated }));
           }
         }

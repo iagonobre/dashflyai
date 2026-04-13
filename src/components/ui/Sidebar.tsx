@@ -4,7 +4,6 @@ import {
   Home01Icon,
   Mail01Icon,
   Settings01Icon,
-  Logout03Icon,
   RobotIcon,
   CreditCardIcon,
 } from "@hugeicons/core-free-icons";
@@ -15,6 +14,8 @@ import { usePathname } from "next/navigation";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useHeaderConfig } from "@/contexts/HeaderConfigContext";
+import { useAiSubscription } from "@/hooks/useSubscription";
+import { useAutomationStats } from "@/hooks/useAutomations";
 
 const menuItems = [
   { name: "Visão Geral", icon: Home01Icon, path: "/" },
@@ -26,8 +27,16 @@ const menuItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { logout, user } = useAuth();
   const { openSidebar, setOpenSidebar } = useHeaderConfig();
+  const { storeId } = useAuth();
+  const { data: subscription } = useAiSubscription(storeId);
+  const { data: stats } = useAutomationStats(storeId);
+
+  const emailsUsed = stats?.emailsProcessedMonth ?? 0;
+  const emailsLimit = subscription?.plan?.emailsPerMonthLimit ?? 0;
+  const planName = subscription?.plan?.name ?? null;
+  const usagePercent = emailsLimit > 0 ? Math.min((emailsUsed / emailsLimit) * 100, 100) : 0;
+  const isNearLimit = usagePercent >= 80;
 
   return (
     <>
@@ -41,7 +50,7 @@ export default function Sidebar() {
 
       <aside
         className={`w-56 h-screen fixed z-29 bg-secondaryContainer flex flex-col
-          justify-between border-x border-border text-white
+          border-x border-border text-white
           pt-24 px-4 pb-4
           transition-transform duration-300
           ${
@@ -81,31 +90,24 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Footer — usuário + logout em linha */}
-        <div className="border-t border-border pt-3">
-          <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-container transition-colors duration-200">
-            <div
-              className="w-7 h-7 rounded-full bg-lightPrimary/20 border border-lightPrimary/30
-              flex items-center justify-center shrink-0"
-            >
-              <span className="text-lightPrimary text-xs font-semibold">
-                {user?.name?.[0]?.toUpperCase() ?? "U"}
+        {/* Footer — plano + uso de emails */}
+        {planName && emailsLimit > 0 && (
+          <div className="mt-auto border-t border-border pt-4 flex flex-col gap-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-darkText text-xs truncate">{planName}</span>
+              <span className={`text-xs shrink-0 ${isNearLimit ? "text-yellowAlert" : "text-darkText"}`}>
+                {emailsUsed.toLocaleString("pt-BR")}/{emailsLimit.toLocaleString("pt-BR")}
               </span>
             </div>
-
-            <p className="text-textLight text-xs font-medium truncate flex-1">
-              {user?.name ?? "Usuário"}
-            </p>
-
-            <button
-              onClick={logout}
-              className="text-darkText hover:text-redAlert transition-colors duration-200 shrink-0"
-              title="Sair"
-            >
-              <HugeiconsIcon icon={Logout03Icon} size={17} />
-            </button>
+            <div className="h-1 w-full bg-border rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500
+                  ${isNearLimit ? "bg-yellowAlert" : "bg-primary"}`}
+                style={{ width: `${usagePercent}%` }}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </aside>
     </>
   );

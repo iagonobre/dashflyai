@@ -111,6 +111,12 @@ export default function OverviewPage() {
     !!settings?.isActive &&
     inboundEmails.some((e) => e.forwardingStatus === null);
 
+  const hasSpfNotVerified =
+    !loadingSettings &&
+    !!settings?.isActive &&
+    inboundEmails.length > 0 &&
+    inboundEmails.some((e) => !e.spfVerified);
+
   const allPoliciesEmpty =
     !loadingSettings &&
     !!settings?.isActive &&
@@ -170,6 +176,33 @@ export default function OverviewPage() {
               </>
             )}
           </button>
+        </div>
+      )}
+
+      {/* Banner: SPF não verificado */}
+      {hasSpfNotVerified && !hasUnconfiguredForwarding && (
+        <div className="bg-yellowAlert/8 border border-yellowAlert/30 rounded-xl px-5 py-4
+          flex items-start gap-4">
+          <div className="w-9 h-9 rounded-lg bg-yellowAlert/10 border border-yellowAlert/20
+            flex items-center justify-center shrink-0 mt-0.5">
+            <HugeiconsIcon icon={ShieldAlert} size={18} className="text-yellowAlert" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white text-sm font-semibold">
+              Configure SPF para evitar que suas respostas caiam no spam
+            </p>
+            <p className="text-darkText text-xs mt-1 leading-relaxed">
+              Sem SPF verificado, os emails enviados pelo assistente podem ser bloqueados
+              ou marcados como spam pelos provedores dos seus clientes.
+            </p>
+            <Link
+              href="/settings?tab=dns"
+              className="inline-flex items-center gap-1 text-yellowAlert text-xs mt-2 hover:underline"
+            >
+              Configurar SPF e DKIM
+              <HugeiconsIcon icon={ArrowRight01Icon} size={12} />
+            </Link>
+          </div>
         </div>
       )}
 

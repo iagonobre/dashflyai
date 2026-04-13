@@ -41,18 +41,18 @@ export default function AutomationsPage() {
       <AutomationStatsCards stats={stats} loading={loadingStats} />
 
       {/* Disputas */}
-      <section className="flex flex-col gap-4">
-        <div>
-          <h2 className="text-white font-semibold text-base">Disputas (Chargebacks)</h2>
+      <section className="bg-container border border-border rounded-xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-border">
+          <h2 className="text-white font-medium text-sm">Disputas (Chargebacks)</h2>
           <p className="text-darkText text-xs mt-0.5">
             Rascunhos de contestação gerados pela Dashfly AI para sua revisão.
           </p>
         </div>
 
         {loadingDisputes ? (
-          <div className="flex flex-col gap-3">
+          <div className="p-4 flex flex-col gap-3">
             {[...Array(2)].map((_, i) => (
-              <div key={i} className="h-52 bg-container border border-border rounded-xl animate-pulse" />
+              <div key={i} className="h-52 bg-background border border-border rounded-xl animate-pulse" />
             ))}
           </div>
         ) : !disputes?.length ? (
@@ -62,7 +62,7 @@ export default function AutomationsPage() {
             description="Quando houver chargebacks, a Dashfly AI gerará rascunhos de contestação aqui."
           />
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="p-4 flex flex-col gap-3">
             {disputes.map((d) => (
               <DisputeDraftCard
                 key={d.id}
@@ -78,13 +78,7 @@ export default function AutomationsPage() {
       </section>
 
       {/* Descadastros */}
-      <section className="flex flex-col gap-4">
-        <div>
-          <h2 className="text-white font-semibold text-base">Descadastros</h2>
-          <p className="text-darkText text-xs mt-0.5">
-            Clientes que optaram por não receber automações de email.
-          </p>
-        </div>
+      <section>
         <UnsubscribeTable
           records={unsubscribes}
           loading={loadingUnsub}

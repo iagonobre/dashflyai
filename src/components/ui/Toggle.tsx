@@ -38,7 +38,7 @@ export default function Toggle({
       )}
 
       <Switch
-        checked={checked}
+        checked={checked ?? false}
         onChange={onChange}
         disabled={disabled}
         className={cn(

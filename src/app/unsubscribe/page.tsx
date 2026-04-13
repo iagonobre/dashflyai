@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   CheckmarkCircle01Icon,
@@ -18,7 +18,7 @@ const SCOPES: Record<string, string> = {
   REENGAGEMENT: "Emails de reativação de clientes",
 };
 
-export default function UnsubscribePage() {
+function UnsubscribePage() {
   const params = useSearchParams();
   const token = params.get("token");
 
@@ -134,5 +134,13 @@ export default function UnsubscribePage() {
         Dashfly AI · Atendimento automatizado para lojas online
       </p>
     </div>
+  );
+}
+
+export default function UnsubscribePageWrapper() {
+  return (
+    <Suspense>
+      <UnsubscribePage />
+    </Suspense>
   );
 }

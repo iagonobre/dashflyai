@@ -35,6 +35,8 @@ function TextSection({
 }: TextSectionProps) {
   const [localText, setLocalText] = useState(value ?? "");
   const [showEditor, setShowEditor] = useState(false);
+  const [showHintInput, setShowHintInput] = useState(false);
+  const [hint, setHint] = useState("");
   const { text: streamText, isStreaming, stream, reset } = useStreamingContent();
 
   const hasContent = localText.trim().length > 0;
@@ -43,7 +45,16 @@ function TextSection({
 
   async function handleGenerate() {
     setShowEditor(true);
-    await stream(streamEndpoint);
+    setShowHintInput(false);
+    await stream(streamEndpoint, undefined, hint.trim() ? { hint: hint.trim() } : undefined);
+  }
+
+  function handleClickGenerate() {
+    if (showHintInput) {
+      handleGenerate();
+    } else {
+      setShowHintInput(true);
+    }
   }
 
   function handleAccept() {
@@ -81,22 +92,55 @@ function TextSection({
       {!hasContent && !showEditorPanel && (
         <div className="border border-yellowAlert/20 bg-yellowAlert/5 rounded-xl px-4 py-3 flex flex-col gap-3">
           <p className="text-darkText text-xs leading-relaxed">{impactMessage}</p>
+
+          {showHintInput && (
+            <div className="flex flex-col gap-2">
+              <p className="text-textLight text-xs font-medium">
+                Conte um pouco sobre sua loja para a IA gerar algo mais preciso:
+              </p>
+              <textarea
+                value={hint}
+                onChange={(e) => setHint(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleGenerate();
+                }}
+                autoFocus
+                rows={2}
+                placeholder={`Ex: Minha loja vende ${label === "FAQ" ? "roupas femininas, aceito trocas em 30 dias pelo WhatsApp" : label.includes("Troca") ? "calçados esportivos, troco em até 7 dias, produto deve estar sem uso" : "para todo o Brasil via Correios, prazo de 5 a 10 dias úteis"}...`}
+                className="w-full bg-container border border-border rounded-lg px-3 py-2 text-white
+                  placeholder:text-darkText focus:outline-none focus:border-primaryStroke
+                  text-sm resize-none transition-colors"
+              />
+              <p className="text-darkText text-[11px]">Opcional — deixe em branco para gerar com base no nome da loja.</p>
+            </div>
+          )}
+
           <div className="flex items-center gap-3 flex-wrap">
             <button
-              onClick={handleGenerate}
+              onClick={handleClickGenerate}
               disabled={isStreaming}
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
                 bg-primary text-white hover:bg-primaryHover transition-colors disabled:opacity-60"
             >
               <HugeiconsIcon icon={SparklesIcon} size={15} />
-              Gerar com IA
+              {showHintInput ? "Gerar agora" : "Gerar com IA"}
             </button>
-            <button
-              onClick={() => setShowEditor(true)}
-              className="text-darkText text-sm hover:text-textLight transition-colors"
-            >
-              Escrever manualmente
-            </button>
+            {!showHintInput && (
+              <button
+                onClick={() => setShowEditor(true)}
+                className="text-darkText text-sm hover:text-textLight transition-colors"
+              >
+                Escrever manualmente
+              </button>
+            )}
+            {showHintInput && (
+              <button
+                onClick={() => setShowHintInput(false)}
+                className="text-darkText text-sm hover:text-textLight transition-colors"
+              >
+                Cancelar
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -118,14 +162,14 @@ function TextSection({
 
           <div className="flex items-center gap-2 flex-wrap">
             <button
-              onClick={handleGenerate}
+              onClick={() => handleGenerate()}
               disabled={isStreaming}
               className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg
                 bg-primary/10 text-lightPrimary border border-primary/30
                 hover:bg-primary/20 transition-colors disabled:opacity-60"
             >
               {isStreaming ? <Spinner size="sm" /> : <HugeiconsIcon icon={SparklesIcon} size={13} />}
-              {hasContent ? "Regenerar com IA" : "Gerar com IA"}
+              {isStreaming ? "Gerando..." : hasContent ? "Regenerar com IA" : "Gerar com IA"}
             </button>
 
             {streamText && !isStreaming && streamText !== localText && (
@@ -191,7 +235,7 @@ export default function CustomTextsForm({ settings, storeId, onSave, isSaving }:
             value={settings.exchangePolicy}
             onSave={(text) => onSave({ exchangePolicy: text || null })}
             isSaving={isSaving}
-            streamEndpoint={`${apiBase}/ai-content/${storeId}/generate/exchange-policy`}
+            streamEndpoint={`${apiBase}/stores/${storeId}/ai-content/generate/exchange-policy`}
           />
         </div>
 
@@ -203,7 +247,7 @@ export default function CustomTextsForm({ settings, storeId, onSave, isSaving }:
             value={settings.shippingPolicy}
             onSave={(text) => onSave({ shippingPolicy: text || null })}
             isSaving={isSaving}
-            streamEndpoint={`${apiBase}/ai-content/${storeId}/generate/shipping-policy`}
+            streamEndpoint={`${apiBase}/stores/${storeId}/ai-content/generate/shipping-policy`}
           />
         </div>
 
@@ -215,7 +259,7 @@ export default function CustomTextsForm({ settings, storeId, onSave, isSaving }:
             value={settings.faq}
             onSave={(text) => onSave({ faq: text || null })}
             isSaving={isSaving}
-            streamEndpoint={`${apiBase}/ai-content/${storeId}/generate/faq`}
+            streamEndpoint={`${apiBase}/stores/${storeId}/ai-content/generate/faq`}
           />
         </div>
       </div>

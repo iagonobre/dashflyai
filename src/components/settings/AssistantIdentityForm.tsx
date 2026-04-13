@@ -6,6 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+
 import Spinner from "@/components/ui/Spinner";
 import { AiSettings } from "@/types/ai-settings.types";
 
@@ -90,33 +93,48 @@ export default function AssistantIdentityForm({ settings, onSave, isSaving }: Pr
       {/* Idioma */}
       <div className="flex flex-col gap-1.5">
         <label className="text-textLight text-sm font-medium">Idioma padrão</label>
-        <select
-          {...register("language")}
-          className="bg-container border border-border rounded-lg px-4 py-2.5 text-white
-            focus:outline-none focus:border-primaryStroke text-sm transition-colors appearance-none"
-        >
-          {languageOptions.map((opt) => (
-            <option key={opt.value} value={opt.value} className="bg-container">
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        {settings.autoDetectLanguage && (
+          <p className="text-darkText text-xs">
+            A detecção automática de idioma está ativa na aba Respostas — o assistente responderá no idioma do cliente e usará este como fallback.
+          </p>
+        )}
+        <div className="relative">
+          <select
+            {...register("language")}
+            className="w-full bg-container border border-border rounded-lg px-4 py-2.5 text-white
+              focus:outline-none focus:border-primaryStroke text-sm transition-colors appearance-none pr-10"
+          >
+            {languageOptions.map((opt) => (
+              <option key={opt.value} value={opt.value} className="bg-container">
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-darkText">
+            <HugeiconsIcon icon={ArrowDown01Icon} size={16} />
+          </div>
+        </div>
       </div>
 
       {/* Tom de voz */}
       <div className="flex flex-col gap-1.5">
         <label className="text-textLight text-sm font-medium">Tom de voz</label>
-        <select
-          {...register("tone")}
-          className="bg-container border border-border rounded-lg px-4 py-2.5 text-white
-            focus:outline-none focus:border-primaryStroke text-sm transition-colors appearance-none"
-        >
-          {toneOptions.map((opt) => (
-            <option key={opt.value} value={opt.value} className="bg-container">
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            {...register("tone")}
+            className="w-full bg-container border border-border rounded-lg px-4 py-2.5 text-white
+              focus:outline-none focus:border-primaryStroke text-sm transition-colors appearance-none pr-10"
+          >
+            {toneOptions.map((opt) => (
+              <option key={opt.value} value={opt.value} className="bg-container">
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-darkText">
+            <HugeiconsIcon icon={ArrowDown01Icon} size={16} />
+          </div>
+        </div>
       </div>
 
       {/* Personalidade */}
@@ -128,7 +146,7 @@ export default function AssistantIdentityForm({ settings, onSave, isSaving }: Pr
         <textarea
           {...register("personality")}
           rows={4}
-          placeholder="Ex: Sou Sofia, assistente virtual da Loja X. Sou simpática, prestativa e sempre respondo com empatia..."
+          placeholder="Ex: Sou Sofia da Loja X. Sou simpática, prestativa e sempre respondo com empatia..."
           className="bg-container border border-border rounded-lg px-4 py-3 text-white
             placeholder:text-darkText focus:outline-none focus:border-primaryStroke
             text-sm resize-none transition-colors"

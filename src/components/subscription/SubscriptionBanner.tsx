@@ -33,7 +33,7 @@ export default function SubscriptionBanner({ subscription }: Props) {
     title: isCanceled ? "Assinatura cancelada" : "Sem plano ativo",
     description: isCanceled
       ? "Você cancelou sua assinatura do Dashfly AI. Assine novamente para reativar o assistente."
-      : "O Dashfly AI não possui um plano ativo. Escolha um plano para ativar o assistente.",
+      : "A Dashfly AI não possui um plano ativo. Escolha um plano para ativar o assistente.",
     cta: isCanceled ? "Reativar assinatura" : "Ver planos",
   };
 
