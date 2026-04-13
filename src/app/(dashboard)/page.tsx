@@ -20,11 +20,10 @@ import { toast } from "sonner";
 import { useState } from "react";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useAiSettings, useActivateAi, useInboundEmails } from "@/hooks/useAiSettings";
+import { useAiSettings, useInboundEmails } from "@/hooks/useAiSettings";
 import { useAutomationStats } from "@/hooks/useAutomationStats";
 import { useConversations } from "@/hooks/useConversations";
 import Badge from "@/components/ui/Badge";
-import Spinner from "@/components/ui/Spinner";
 import { cn } from "@/lib/utils";
 
 function StatCard({
@@ -96,8 +95,6 @@ export default function OverviewPage() {
   );
   const { data: inboundEmails = [] } = useInboundEmails(storeId);
 
-  const activateAi = useActivateAi(storeId);
-
   const pendingList = pending?.slice(0, 5) ?? [];
 
   const DISMISS_KEY = `policies-banner-dismissed-${storeId}`;
@@ -156,25 +153,12 @@ export default function OverviewPage() {
             </div>
           </div>
           <button
-            onClick={() =>
-              activateAi.mutate(undefined, {
-                onSuccess: () => {
-                  router.push("/settings");
-                },
-              })
-            }
-            disabled={activateAi.isPending}
+            onClick={() => router.push("/onboarding")}
             className="shrink-0 bg-primary hover:bg-primaryHover text-white text-sm font-medium
-              px-4 py-2 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-60"
+              px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
           >
-            {activateAi.isPending ? (
-              <Spinner size="sm" />
-            ) : (
-              <>
-                Ativar agora
-                <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
-              </>
-            )}
+            Ativar agora
+            <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
           </button>
         </div>
       )}

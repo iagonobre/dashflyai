@@ -17,6 +17,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   useAiSettings,
+  useActivateAi,
   useUpdateAiSettings,
   useInboundEmails,
   useAddInboundEmail,
@@ -147,6 +148,7 @@ export default function OnboardingPage() {
   const deleteEmail = useDeleteInboundEmail(storeId);
   const { data: plans = [], isLoading: loadingPlans } = useAiPlans();
   const subscribe = useSubscribeAi(storeId);
+  const activateAi = useActivateAi(storeId);
   const initForwarding = useInitForwarding(storeId);
   const sendVerification = useSendForwardingVerification(storeId);
   const verifyDns = useVerifyDns(storeId);
@@ -951,12 +953,19 @@ export default function OnboardingPage() {
                   Voltar
                 </button>
                 <button
-                  onClick={next}
+                  onClick={() => activateAi.mutate(undefined, { onSuccess: next })}
+                  disabled={activateAi.isPending}
                   className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white
-                    bg-primary hover:bg-primaryHover rounded-xl transition-colors"
+                    bg-primary hover:bg-primaryHover rounded-xl transition-colors disabled:opacity-60"
                 >
-                  Confirmar
-                  <HugeiconsIcon icon={ArrowRight01Icon} size={15} />
+                  {activateAi.isPending ? (
+                    <Spinner size="sm" />
+                  ) : (
+                    <>
+                      Confirmar
+                      <HugeiconsIcon icon={ArrowRight01Icon} size={15} />
+                    </>
+                  )}
                 </button>
               </div>
             </>
