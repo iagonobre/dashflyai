@@ -11,18 +11,9 @@ function BackendOfflineQueryGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!backendOffline) return;
-
-    // Cancel all in-flight queries so they stop spinning
+    // Cancel in-flight requests so they stop spinning — but don't globally
+    // disable queries (that would break mutations and future navigations)
     queryClient.cancelQueries();
-
-    // Disable all queries while offline — they won't refetch until re-enabled
-    queryClient.setDefaultOptions({
-      queries: {
-        enabled: false,
-        retry: false,
-        staleTime: 60 * 1000,
-      },
-    });
   }, [backendOffline, queryClient]);
 
   return <>{children}</>;

@@ -1,9 +1,9 @@
 export type ConversationStatus =
-  | "pending_manual_review"
-  | "approved"
-  | "sent"
-  | "rejected"
-  | "blacklist";
+  | "PENDING_AI"
+  | "PENDING_MANUAL_REVIEW"
+  | "APPROVED"
+  | "REJECTED"
+  | "SENT";
 
 export type MessageDirection = "INBOUND" | "OUTBOUND";
 export type DeliveryStatus = "DELIVERED" | "BOUNCED" | "DEFERRED";

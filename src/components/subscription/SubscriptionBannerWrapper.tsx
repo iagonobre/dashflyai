@@ -15,17 +15,15 @@ export default function SubscriptionBannerWrapper() {
   useEffect(() => {
     // Wait for auth to resolve before redirecting
     if (authLoading) return;
-    // No active store = redirect to onboarding
+    // No store at all (brand new user) → send to onboarding
     if (!storeId) {
       router.replace("/onboarding");
-      return;
     }
-    // Wait for subscription query to finish
-    if (isLoading) return;
-    if (!subscription) {
-      router.replace("/onboarding");
-    }
-  }, [authLoading, storeId, isLoading, subscription, router]);
+    // NOTE: we intentionally do NOT redirect when !subscription.
+    // If the user switches to an unconfigured store, they should see
+    // the "AI não ativa" banner on the dashboard and choose what to do —
+    // not get forced into onboarding and stuck there.
+  }, [authLoading, storeId, router]);
 
   // Não mostra o banner na própria página de assinatura
   if (pathname === "/subscription") return null;

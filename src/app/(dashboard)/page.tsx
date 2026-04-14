@@ -87,7 +87,7 @@ export default function OverviewPage() {
   const { storeId } = useAuth();
   const router = useRouter();
 
-  const { data: settings, isLoading: loadingSettings } = useAiSettings(storeId);
+  const { data: settings, isLoading: loadingSettings, isError: settingsError } = useAiSettings(storeId);
   const { data: stats, isLoading: loadingStats } = useAutomationStats(storeId);
   const { data: pending, isLoading: loadingPending } = useConversations(
     storeId,

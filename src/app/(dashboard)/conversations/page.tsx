@@ -12,12 +12,11 @@ import { ConversationStatus } from "@/types/conversation.types";
 import { cn } from "@/lib/utils";
 
 const tabs: { label: string; value: ConversationStatus | "all" }[] = [
-  { label: "Todas",    value: "all" },
-  { label: "Pendente", value: "pending_manual_review" },
-  { label: "Enviado",  value: "sent" },
-  { label: "Aprovado", value: "approved" },
-  { label: "Rejeitado",value: "rejected" },
-  { label: "Blacklist",value: "blacklist" },
+  { label: "Todas",      value: "all" },
+  { label: "Pendente",   value: "PENDING_MANUAL_REVIEW" },
+  { label: "Enviado",    value: "SENT" },
+  { label: "Aprovado",   value: "APPROVED" },
+  { label: "Rejeitado",  value: "REJECTED" },
 ];
 
 function ConversationsContent() {

@@ -146,8 +146,10 @@ export default function OnboardingPage() {
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [trialDays, setTrialDays] = useState<number | null>(null);
   const [savedIdentity, setSavedIdentity] = useState<IdentityForm | null>(null);
+  // Always show store selection at onboarding entry so the user knows which store is being configured
+  const [storeConfirmed, setStoreConfirmed] = useState(false);
 
-  const activeStores = user?.stores ?? [];
+  const activeStores = (user?.stores ?? []).filter((s) => s.status !== "DISCONNECTED");
 
   const { data: subscription, isLoading: loadingSubscription } = useAiSubscription(storeId);
   const { data: settings, isLoading: loadingSettings } = useAiSettings(storeId);
@@ -303,8 +305,12 @@ export default function OnboardingPage() {
     router.push("/");
   }
 
-  // Store selection — shown when user has multiple stores and none is active yet
-  if (user && !storeId && activeStores.length > 1) {
+  // Store selection — always shown at onboarding entry so user knows which store is being configured
+  if (user && !storeConfirmed) {
+    const emailLimit = subscription?.plan.inboundEmailsLimit ?? 1;
+    const emailsUsed = inboundEmails.length;
+    const atLimit = emailsUsed >= emailLimit;
+
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
         <div className="w-full max-w-md bg-container border border-border rounded-2xl p-8 flex flex-col gap-6">
@@ -315,26 +321,65 @@ export default function OnboardingPage() {
             <p className="text-darkText text-xs">Configuração inicial</p>
           </div>
           <div>
-            <h2 className="text-white text-xl font-semibold">Para qual loja você quer configurar?</h2>
+            <h2 className="text-white text-xl font-semibold">
+              {activeStores.length === 1 ? "Confirme a loja a configurar" : "Para qual loja você quer configurar?"}
+            </h2>
             <p className="text-darkText text-sm mt-2 leading-relaxed">
-              Escolha a loja que o assistente vai atender. Você pode configurar as demais depois.
+              {activeStores.length === 1
+                ? "O assistente será configurado para a loja abaixo. Confirme para continuar."
+                : "Escolha a loja que o assistente vai atender. Você pode configurar as demais depois."}
             </p>
           </div>
           <div className="flex flex-col gap-2">
-            {activeStores.map((store) => (
-              <button
-                key={store.id}
-                onClick={() => setStoreId(store.id)}
-                className="w-full text-left border border-border bg-background hover:border-primaryStroke
-                  hover:bg-primary/5 rounded-xl px-4 py-3 transition-all"
-              >
-                <p className="text-white text-sm font-medium">{store.name}</p>
-                {store.url && (
-                  <p className="text-darkText text-xs mt-0.5">{store.url}</p>
-                )}
-              </button>
-            ))}
+            {activeStores.map((store) => {
+              const isSelected = store.id === storeId;
+              return (
+                <button
+                  key={store.id}
+                  onClick={() => {
+                    setStoreId(store.id);
+                    setStoreConfirmed(true);
+                  }}
+                  className={cn(
+                    "w-full text-left border rounded-xl px-4 py-3 transition-all",
+                    isSelected
+                      ? "border-primaryStroke/50 bg-primary/10"
+                      : "border-border bg-background hover:border-primaryStroke hover:bg-primary/5"
+                  )}
+                >
+                  <p className="text-white text-sm font-medium">{store.name}</p>
+                  {store.url && (
+                    <p className="text-darkText text-xs mt-0.5">{store.url}</p>
+                  )}
+                  {isSelected && !loadingSubscription && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className={cn(
+                        "text-xs px-2 py-0.5 rounded-full border",
+                        atLimit
+                          ? "bg-yellowAlert/10 border-yellowAlert/30 text-yellowAlert"
+                          : "bg-primary/10 border-primaryStroke/30 text-lightPrimary"
+                      )}>
+                        {emailsUsed}/{emailLimit} {emailLimit === 1 ? "email" : "emails"} usados
+                      </span>
+                      {atLimit && (
+                        <span className="text-yellowAlert text-xs">Limite atingido</span>
+                      )}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
+
+          {/* Aviso de limite atingido */}
+          {storeId && atLimit && !loadingSubscription && (
+            <div className="bg-yellowAlert/8 border border-yellowAlert/30 rounded-lg px-4 py-3">
+              <p className="text-yellowAlert text-xs leading-relaxed">
+                Esta loja já atingiu o limite de {emailLimit} {emailLimit === 1 ? "email" : "emails"} do plano atual.
+                Para adicionar mais emails, faça upgrade do plano.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     );

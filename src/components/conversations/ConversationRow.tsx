@@ -12,23 +12,24 @@ import Badge from "@/components/ui/Badge";
 import { EmailConversation, ConversationStatus } from "@/types/conversation.types";
 import { cn } from "@/lib/utils";
 
-const statusConfig: Record<
-  ConversationStatus,
-  { label: string; variant: "pending" | "sent" | "rejected" | "blacklist" | "approved" | "default" }
-> = {
-  pending_manual_review: { label: "Pendente",  variant: "pending" },
-  approved:              { label: "Aprovado",  variant: "approved" },
-  sent:                  { label: "Enviado",   variant: "sent" },
-  rejected:              { label: "Rejeitado", variant: "rejected" },
-  blacklist:             { label: "Blacklist", variant: "blacklist" },
+type StatusVariant = "pending" | "sent" | "rejected" | "blacklist" | "approved" | "default";
+
+const statusConfig: Record<ConversationStatus, { label: string; variant: StatusVariant }> = {
+  PENDING_AI:           { label: "Processando", variant: "pending" },
+  PENDING_MANUAL_REVIEW:{ label: "Pendente",    variant: "pending" },
+  APPROVED:             { label: "Aprovado",    variant: "approved" },
+  REJECTED:             { label: "Rejeitado",   variant: "rejected" },
+  SENT:                 { label: "Enviado",     variant: "sent" },
 };
+
+const FALLBACK_STATUS = { label: "Desconhecido", variant: "default" as StatusVariant };
 
 interface ConversationRowProps {
   conversation: EmailConversation;
 }
 
 export default function ConversationRow({ conversation: conv }: ConversationRowProps) {
-  const status = statusConfig[conv.status];
+  const status = statusConfig[conv.status] ?? FALLBACK_STATUS;
 
   return (
     <Link

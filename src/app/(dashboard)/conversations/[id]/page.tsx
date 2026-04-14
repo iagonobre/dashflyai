@@ -22,12 +22,14 @@ import Badge from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 
 const statusLabel: Record<string, { label: string; variant: any }> = {
-  pending_manual_review: { label: "Pendente",  variant: "pending" },
-  approved:              { label: "Aprovado",  variant: "approved" },
-  sent:                  { label: "Enviado",   variant: "sent" },
-  rejected:              { label: "Rejeitado", variant: "rejected" },
-  blacklist:             { label: "Blacklist", variant: "blacklist" },
+  PENDING_AI:            { label: "Processando", variant: "pending" },
+  PENDING_MANUAL_REVIEW: { label: "Pendente",    variant: "pending" },
+  APPROVED:              { label: "Aprovado",    variant: "approved" },
+  REJECTED:              { label: "Rejeitado",   variant: "rejected" },
+  SENT:                  { label: "Enviado",     variant: "sent" },
 };
+
+const FALLBACK_STATUS = { label: "Desconhecido", variant: "default" };
 
 export default function ConversationDetailPage({
   params,
@@ -42,7 +44,7 @@ export default function ConversationDetailPage({
   const reject = useRejectConversation(storeId);
   const editAndApprove = useEditAndApprove(storeId);
 
-  const isPending = conv?.status === "pending_manual_review";
+  const isPending = conv?.status === "PENDING_MANUAL_REVIEW";
   const lastOutbound = conv?.messages
     ?.filter((m) => m.direction === "OUTBOUND")
     .at(-1);
@@ -68,7 +70,7 @@ export default function ConversationDetailPage({
     );
   }
 
-  const status = statusLabel[conv.status];
+  const status = statusLabel[conv.status] ?? FALLBACK_STATUS;
 
   return (
     <div className="p-6 flex flex-col gap-5">
