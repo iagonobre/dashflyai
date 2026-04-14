@@ -20,26 +20,47 @@ const DEFAULT_DELAY = {
   maxMinutes: 10,
 };
 
+function parseMin(val: string, fallback: number): number {
+  const n = parseInt(val, 10);
+  return isNaN(n) || n < 1 ? fallback : n;
+}
+
 export default function ReplyDelayForm({ settings, onSave, isSaving }: Props) {
   const saved = settings.replyDelay ?? DEFAULT_DELAY;
 
   const [enabled, setEnabled] = useState(saved.enabled);
   const [mode, setMode] = useState<"fixed" | "random">(saved.mode);
-  const [fixedMinutes, setFixedMinutes] = useState(saved.fixedMinutes);
-  const [minMinutes, setMinMinutes] = useState(saved.minMinutes);
-  const [maxMinutes, setMaxMinutes] = useState(saved.maxMinutes);
+  const [fixedStr, setFixedStr] = useState(String(saved.fixedMinutes));
+  const [minStr, setMinStr] = useState(String(saved.minMinutes));
+  const [maxStr, setMaxStr] = useState(String(saved.maxMinutes));
 
-  const current = { enabled, mode, fixedMinutes, minMinutes, maxMinutes };
-  const isDirty = JSON.stringify(current) !== JSON.stringify(saved);
+  const parsed = {
+    fixedMinutes: parseMin(fixedStr, saved.fixedMinutes),
+    minMinutes: parseMin(minStr, saved.minMinutes),
+    maxMinutes: parseMin(maxStr, saved.maxMinutes),
+  };
+
+  const isDirty =
+    enabled !== saved.enabled ||
+    mode !== saved.mode ||
+    parsed.fixedMinutes !== saved.fixedMinutes ||
+    parsed.minMinutes !== saved.minMinutes ||
+    parsed.maxMinutes !== saved.maxMinutes;
 
   function handleToggle(checked: boolean) {
     setEnabled(checked);
-    onSave({ replyDelay: { ...current, enabled: checked } });
+    onSave({
+      replyDelay: {
+        enabled: checked,
+        mode,
+        ...parsed,
+      },
+    });
   }
 
   function handleSave() {
     if (!isDirty) return;
-    onSave({ replyDelay: current });
+    onSave({ replyDelay: { enabled, mode, ...parsed } });
   }
 
   return (
@@ -87,8 +108,9 @@ export default function ReplyDelayForm({ settings, onSave, isSaving }: Props) {
                 <input
                   type="number"
                   min={1}
-                  value={fixedMinutes}
-                  onChange={(e) => setFixedMinutes(Number(e.target.value))}
+                  value={fixedStr}
+                  onChange={(e) => setFixedStr(e.target.value)}
+                  onBlur={() => setFixedStr(String(parsed.fixedMinutes))}
                   className="w-28 bg-container border border-border rounded-lg px-4 py-2.5
                     text-white focus:outline-none focus:border-primaryStroke text-sm transition-colors"
                 />
@@ -111,8 +133,9 @@ export default function ReplyDelayForm({ settings, onSave, isSaving }: Props) {
                 <input
                   type="number"
                   min={1}
-                  value={minMinutes}
-                  onChange={(e) => setMinMinutes(Number(e.target.value))}
+                  value={minStr}
+                  onChange={(e) => setMinStr(e.target.value)}
+                  onBlur={() => setMinStr(String(parsed.minMinutes))}
                   className="w-24 bg-container border border-border rounded-lg px-4 py-2.5
                     text-white focus:outline-none focus:border-primaryStroke text-sm transition-colors"
                 />
@@ -120,8 +143,9 @@ export default function ReplyDelayForm({ settings, onSave, isSaving }: Props) {
                 <input
                   type="number"
                   min={1}
-                  value={maxMinutes}
-                  onChange={(e) => setMaxMinutes(Number(e.target.value))}
+                  value={maxStr}
+                  onChange={(e) => setMaxStr(e.target.value)}
+                  onBlur={() => setMaxStr(String(parsed.maxMinutes))}
                   className="w-24 bg-container border border-border rounded-lg px-4 py-2.5
                     text-white focus:outline-none focus:border-primaryStroke text-sm transition-colors"
                 />

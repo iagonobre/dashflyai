@@ -31,9 +31,15 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
         <span className="text-xs text-darkText">
           {isOutbound ? "Dashfly AI" : "Cliente"}
         </span>
-        <span className="text-darkText/50 text-[11px]">
-          · {format(new Date(message.timestamp), "dd MMM, HH:mm", { locale: ptBR })}
-        </span>
+        {message.timestamp && (
+          <span className="text-darkText/50 text-[11px]">
+            ·{" "}
+            {(() => {
+              const d = new Date(message.timestamp);
+              return isNaN(d.getTime()) ? "" : format(d, "dd MMM, HH:mm", { locale: ptBR });
+            })()}
+          </span>
+        )}
       </div>
 
       {/* Balão */}

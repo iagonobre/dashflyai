@@ -6,6 +6,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 
 import Toggle from "@/components/ui/Toggle";
 import Spinner from "@/components/ui/Spinner";
+import NumberInput from "@/components/ui/NumberInput";
 import { AiSettings, CartAttempt } from "@/types/ai-settings.types";
 
 const MAX_ATTEMPTS = 5;
@@ -130,11 +131,10 @@ export default function CartAttemptsEditor({ settings, onSave, isSaving, spfNotV
                       <label className="text-darkText text-xs font-medium uppercase tracking-wide">
                         Enviar após (horas)
                       </label>
-                      <input
-                        type="number"
+                      <NumberInput
                         min={1}
                         value={attempt.delayHours}
-                        onChange={(e) => updateAttempt(index, { delayHours: Number(e.target.value) })}
+                        onChange={(v) => updateAttempt(index, { delayHours: v })}
                         className="bg-background border border-border rounded-lg px-4 py-2.5 text-white
                           focus:outline-none focus:border-primaryStroke text-sm transition-colors"
                       />
@@ -200,14 +200,11 @@ export default function CartAttemptsEditor({ settings, onSave, isSaving, spfNotV
                     />
                     {attempt.discountEnabled && (
                       <div className="flex items-center gap-3 ml-0">
-                        <input
-                          type="number"
+                        <NumberInput
                           min={1}
                           max={100}
                           value={attempt.discountPercent ?? 10}
-                          onChange={(e) =>
-                            updateAttempt(index, { discountPercent: Number(e.target.value) })
-                          }
+                          onChange={(v) => updateAttempt(index, { discountPercent: v })}
                           className="w-24 bg-background border border-border rounded-lg px-4 py-2.5
                             text-white focus:outline-none focus:border-primaryStroke text-sm"
                         />

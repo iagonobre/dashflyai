@@ -16,12 +16,13 @@ interface Props {
 
 export default function ReengagementForm({ settings, onToggle, onSave, isSaving, spfNotVerified = false }: Props) {
   const re = settings.reengagement ?? { enabled: false, inactivityDays: 30 };
-  const [days, setDays] = useState<number>(re.inactivityDays);
-  const isDirty = days !== re.inactivityDays;
+  const [daysStr, setDaysStr] = useState(String(re.inactivityDays));
+  const parsedDays = (() => { const n = parseInt(daysStr, 10); return isNaN(n) || n < 7 ? re.inactivityDays : n; })();
+  const isDirty = parsedDays !== re.inactivityDays;
 
   function handleSaveDays() {
     if (!isDirty) return;
-    onSave({ reengagement: { ...re, inactivityDays: days } });
+    onSave({ reengagement: { ...re, inactivityDays: parsedDays } });
   }
 
   return (
@@ -49,8 +50,9 @@ export default function ReengagementForm({ settings, onToggle, onSave, isSaving,
             <input
               type="number"
               min={7}
-              value={days}
-              onChange={(e) => setDays(Number(e.target.value))}
+              value={daysStr}
+              onChange={(e) => setDaysStr(e.target.value)}
+              onBlur={() => setDaysStr(String(parsedDays))}
               className="w-28 bg-container border border-border rounded-lg px-4 py-2.5
                 text-white focus:outline-none focus:border-primaryStroke text-sm transition-colors"
             />
