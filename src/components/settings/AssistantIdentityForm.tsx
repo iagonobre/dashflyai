@@ -140,7 +140,7 @@ export default function AssistantIdentityForm({ settings, onSave, isSaving }: Pr
       {/* Personalidade */}
       <div className="flex flex-col gap-1.5">
         <label className="text-textLight text-sm font-medium">Personalidade</label>
-        <p className="text-darkText text-xs">
+        <p className="text-darkText text-sm">
           Descreva como o assistente deve se comportar e se apresentar ao cliente.
         </p>
         <textarea
@@ -157,7 +157,7 @@ export default function AssistantIdentityForm({ settings, onSave, isSaving }: Pr
         <button
           type="submit"
           disabled={isSaving || !isDirty}
-          className="px-5 py-2 text-sm font-medium text-white bg-primary hover:bg-primaryHover
+          className="px-5 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primaryHover
             rounded-lg transition-colors flex items-center gap-2 disabled:opacity-60"
         >
           {isSaving ? <Spinner size="sm" /> : "Salvar"}

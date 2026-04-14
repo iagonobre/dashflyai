@@ -42,7 +42,7 @@ export default function BlacklistEditor({ settings, onSave, isSaving }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <p className="text-darkText text-xs leading-relaxed">
+        <p className="text-darkText text-sm leading-relaxed">
           Quando um email do cliente mencionar alguma dessas palavras, o assistente{" "}
           <span className="text-yellowAlert font-medium">não responde automaticamente</span>{" "}
           — ele te avisa para você responder pessoalmente. Útil para assuntos delicados
@@ -90,7 +90,7 @@ export default function BlacklistEditor({ settings, onSave, isSaving }: Props) {
         <button
           onClick={handleAdd}
           disabled={isSaving || !newWord.trim()}
-          className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primaryHover
+          className="px-4 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primaryHover
             rounded-lg transition-colors flex items-center gap-2 disabled:opacity-60 shrink-0"
         >
           <HugeiconsIcon icon={Add01Icon} size={15} />

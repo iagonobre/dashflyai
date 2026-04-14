@@ -103,6 +103,18 @@ export default function OverviewPage() {
     return localStorage.getItem(DISMISS_KEY) === "1";
   });
 
+  const RESUME_KEY = storeId ? `onboarding_resume_step_${storeId}` : null;
+  const [resumeStep, setResumeStep] = useState<number | null>(() => {
+    if (typeof window === "undefined" || !storeId) return null;
+    const saved = localStorage.getItem(`onboarding_resume_step_${storeId}`);
+    return saved ? parseInt(saved, 10) : null;
+  });
+
+  function dismissResumeBanner() {
+    if (RESUME_KEY) localStorage.removeItem(RESUME_KEY);
+    setResumeStep(null);
+  }
+
   const hasUnconfiguredForwarding =
     !loadingSettings &&
     inboundEmails.some((e) => e.forwardingStatus !== "configured");
@@ -135,6 +147,42 @@ export default function OverviewPage() {
           Acompanhe o desempenho do seu atendimento automatizado.
         </p>
       </div>
+
+      {/* Banner: retomada de onboarding */}
+      {resumeStep !== null && !loadingSettings && !settings?.isActive && (
+        <div className="bg-primary/8 border border-primaryStroke/30 rounded-xl px-5 py-4 flex items-start gap-4">
+          <div className="w-9 h-9 rounded-lg bg-primary/20 border border-primaryStroke/30 flex items-center justify-center shrink-0 mt-0.5">
+            <HugeiconsIcon icon={resumeStep === 2 ? Mail01Icon : ShieldAlert} size={18} className="text-lightPrimary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white text-sm font-semibold">
+              {resumeStep === 2
+                ? "Configuração de encaminhamento pendente"
+                : "Verificação de domínio pendente"}
+            </p>
+            <p className="text-darkText text-sm mt-1 leading-relaxed">
+              {resumeStep === 2
+                ? "Você salvou o progresso do onboarding. Continue de onde parou para ativar o assistente."
+                : "Configure o SPF e DKIM do seu domínio para ativar o envio de respostas."}
+            </p>
+            <div className="flex items-center gap-4 mt-2">
+              <button
+                onClick={() => router.push("/onboarding")}
+                className="inline-flex items-center gap-1.5 text-lightPrimary text-sm hover:underline"
+              >
+                Retomar configuração
+                <HugeiconsIcon icon={ArrowRight01Icon} size={13} />
+              </button>
+              <button
+                onClick={dismissResumeBanner}
+                className="text-darkText text-sm hover:text-textLight transition-colors"
+              >
+                Dispensar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Banner: AI não ativa */}
       {!loadingSettings && settings && !settings.isActive && (

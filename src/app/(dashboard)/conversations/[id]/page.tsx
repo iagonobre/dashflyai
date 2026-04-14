@@ -9,6 +9,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { use } from "react";
 import Link from "next/link";
 
+import { useAuth } from "@/contexts/AuthContext";
 import {
   useConversation,
   useApproveConversation,
@@ -34,11 +35,12 @@ export default function ConversationDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { data: conv, isLoading } = useConversation(id);
+  const { storeId } = useAuth();
+  const { data: conv, isLoading } = useConversation(storeId, id);
 
-  const approve = useApproveConversation();
-  const reject = useRejectConversation();
-  const editAndApprove = useEditAndApprove();
+  const approve = useApproveConversation(storeId);
+  const reject = useRejectConversation(storeId);
+  const editAndApprove = useEditAndApprove(storeId);
 
   const isPending = conv?.status === "pending_manual_review";
   const lastOutbound = conv?.messages

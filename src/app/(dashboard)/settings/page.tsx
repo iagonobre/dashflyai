@@ -25,6 +25,7 @@ import {
   useSendForwardingVerification,
   useVerifyDns,
 } from "@/hooks/useForwarding";
+import { useAiSubscription } from "@/hooks/useSubscription";
 import { toast } from "sonner";
 
 import AssistantIdentityForm from "@/components/settings/AssistantIdentityForm";
@@ -37,6 +38,7 @@ import PostPurchaseForm from "@/components/settings/PostPurchaseForm";
 import ReengagementForm from "@/components/settings/ReengagementForm";
 import CustomTextsForm from "@/components/settings/CustomTextsForm";
 import DnsSettingsSection from "@/components/settings/DnsSettingsSection";
+import ReplyDelayForm from "@/components/settings/ReplyDelayForm";
 import { AiSettings } from "@/types/ai-settings.types";
 
 const tabs = [
@@ -85,9 +87,13 @@ function SettingsPage() {
 
   const { data: settings, isLoading, isError } = useAiSettings(storeId);
   const updateSettings = useUpdateAiSettings(storeId);
+  const { data: subscription } = useAiSubscription(storeId);
 
-  const { data: inboundEmails = [], isLoading: loadingEmails } =
-    useInboundEmails(storeId);
+  const {
+    data: inboundEmails = [],
+    isLoading: loadingEmails,
+    isError: emailsError,
+  } = useInboundEmails(storeId);
   const addEmail = useAddInboundEmail(storeId);
   const deleteEmail = useDeleteInboundEmail(storeId);
   const initForwarding = useInitForwarding(storeId);
@@ -106,9 +112,10 @@ function SettingsPage() {
     sendVerification.mutate(id);
   }
 
-  const emailNotConfigured = !loadingEmails && inboundEmails.length === 0;
+  const emailNotConfigured = !loadingEmails && !emailsError && inboundEmails.length === 0;
   const spfNotVerified =
     !loadingEmails &&
+    !emailsError &&
     inboundEmails.length > 0 &&
     inboundEmails.some((e) => !e.spfVerified);
 
@@ -246,7 +253,7 @@ function SettingsPage() {
         {/* Painel de conteúdo */}
         <div className="flex-1 bg-container border border-border rounded-xl overflow-hidden">
           {/* Header do painel */}
-          <div className="px-5 py-4 border-b border-border">
+          <div className="px-6 py-5 border-b border-border">
             <p className="text-white font-semibold text-base">
               {tabs.find((t) => t.id === activeTab)?.label}
             </p>
@@ -255,7 +262,7 @@ function SettingsPage() {
             </p>
           </div>
 
-          <div className="px-5 py-6">
+          <div className="px-6 py-6">
             {/* ENCAMINHAMENTO */}
             {activeTab === "forwarding" && (
               <InboundEmailsManager
@@ -271,6 +278,7 @@ function SettingsPage() {
                 }
                 isForwardingConnecting={initForwarding.isPending}
                 isSendingVerification={sendVerification.isPending}
+                maxEmails={subscription?.plan.inboundEmailsLimit ?? 1}
               />
             )}
 
@@ -289,7 +297,7 @@ function SettingsPage() {
 
             {/* RESPOSTAS */}
             {activeTab === "email" && (
-              <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-10">
                 {/* Banner SPF */}
                 {spfNotVerified && (
                   <div
@@ -339,6 +347,24 @@ function SettingsPage() {
                     onSave={handleSave}
                     onToggle={handleToggle}
                     isSaving={updateSettings.isPending}
+                    spfNotVerified={spfNotVerified}
+                  />
+                </section>
+
+                <section className="border-t border-border pt-6 flex flex-col gap-4">
+                  <div>
+                    <p className="text-textLight text-base font-semibold">
+                      Delay de resposta
+                    </p>
+                    <p className="text-darkText text-sm mt-0.5">
+                      Configure um tempo de espera antes de responder, tornando
+                      a interação mais natural e menos robótica.
+                    </p>
+                  </div>
+                  <ReplyDelayForm
+                    settings={settings}
+                    onSave={handleSave}
+                    isSaving={updateSettings.isPending}
                   />
                 </section>
 
@@ -363,7 +389,7 @@ function SettingsPage() {
 
             {/* ASSISTENTE */}
             {activeTab === "assistant" && (
-              <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-10">
                 <section className="flex flex-col gap-4">
                   <div>
                     <p className="text-textLight text-base font-semibold">
@@ -419,7 +445,7 @@ function SettingsPage() {
 
             {/* AUTOMAÇÕES */}
             {activeTab === "automations" && (
-              <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-10">
                 <section className="flex flex-col gap-4">
                   <div>
                     <p className="text-textLight text-base font-semibold">
@@ -434,6 +460,7 @@ function SettingsPage() {
                     settings={settings}
                     onSave={handleSave}
                     isSaving={updateSettings.isPending}
+                    spfNotVerified={spfNotVerified}
                   />
                 </section>
 
@@ -449,6 +476,7 @@ function SettingsPage() {
                   <PostPurchaseForm
                     settings={settings}
                     onToggle={handleToggle}
+                    spfNotVerified={spfNotVerified}
                   />
                 </section>
 
@@ -467,6 +495,7 @@ function SettingsPage() {
                     onToggle={handleToggle}
                     onSave={handleSave}
                     isSaving={updateSettings.isPending}
+                    spfNotVerified={spfNotVerified}
                   />
                 </section>
               </div>

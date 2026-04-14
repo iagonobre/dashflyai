@@ -76,12 +76,12 @@ function TextSection({
           <p className="text-darkText text-xs mt-0.5">{description}</p>
         </div>
         {hasContent ? (
-          <span className="flex items-center gap-1 text-greenAlert text-[11px] whitespace-nowrap shrink-0 mt-0.5">
+          <span className="flex items-center gap-1 text-greenAlert text-xs whitespace-nowrap shrink-0 mt-0.5">
             <HugeiconsIcon icon={CheckmarkCircle01Icon} size={12} />
             {localText.trim().length} caracteres
           </span>
         ) : (
-          <span className="flex items-center gap-1 text-yellowAlert text-[11px] whitespace-nowrap shrink-0 mt-0.5">
+          <span className="flex items-center gap-1 text-yellowAlert text-xs whitespace-nowrap shrink-0 mt-0.5">
             <HugeiconsIcon icon={AlertCircleIcon} size={12} />
             Não configurado
           </span>
@@ -111,7 +111,7 @@ function TextSection({
                   placeholder:text-darkText focus:outline-none focus:border-primaryStroke
                   text-sm resize-none transition-colors"
               />
-              <p className="text-darkText text-[11px]">Opcional — deixe em branco para gerar com base no nome da loja.</p>
+              <p className="text-darkText text-xs">Opcional — deixe em branco para gerar com base no nome da loja.</p>
             </div>
           )}
 

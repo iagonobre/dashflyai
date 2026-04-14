@@ -32,9 +32,10 @@ interface Props {
   settings: AiSettings;
   onSave: (data: Partial<AiSettings>) => void;
   isSaving: boolean;
+  spfNotVerified?: boolean;
 }
 
-export default function CartAttemptsEditor({ settings, onSave, isSaving }: Props) {
+export default function CartAttemptsEditor({ settings, onSave, isSaving, spfNotVerified = false }: Props) {
   const cartSettings = settings.cartAbandonment ?? { enabled: false, attempts: [] };
   const [attempts, setAttempts] = useState<CartAttempt[]>(cartSettings.attempts ?? []);
 
@@ -74,6 +75,8 @@ export default function CartAttemptsEditor({ settings, onSave, isSaving }: Props
         }
         label="Carrinho abandonado ativo"
         description="Envia sequência de emails para clientes que abandonaram o carrinho."
+        warning={spfNotVerified ? "Domínio não verificado" : undefined}
+        disabled={spfNotVerified}
       />
 
       {cartSettings.enabled && (
@@ -83,7 +86,7 @@ export default function CartAttemptsEditor({ settings, onSave, isSaving }: Props
             <p className="text-lightPrimary text-xs font-medium mb-1.5">Variáveis disponíveis</p>
             <div className="flex flex-wrap gap-1.5">
               {VARIABLES.map((v) => (
-                <code key={v} className="bg-primary/20 text-lightPrimary text-[11px] px-2 py-0.5 rounded">
+                <code key={v} className="bg-primary/20 text-lightPrimary text-xs px-2 py-0.5 rounded">
                   {v}
                 </code>
               ))}
@@ -242,7 +245,7 @@ export default function CartAttemptsEditor({ settings, onSave, isSaving }: Props
             <button
               onClick={handleSave}
               disabled={isSaving || !isDirty}
-              className="px-5 py-2 text-sm font-medium text-white bg-primary hover:bg-primaryHover
+              className="px-5 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primaryHover
                 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-60"
             >
               {isSaving ? <Spinner size="sm" /> : "Salvar tentativas"}

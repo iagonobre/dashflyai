@@ -26,6 +26,7 @@ import {
 import { useAiPlans, useAiSubscription, useSubscribeAi } from "@/hooks/useSubscription";
 import { useInitForwarding, useSendForwardingVerification, useVerifyDns } from "@/hooks/useForwarding";
 import { useStreamingContent } from "@/hooks/useStreamingContent";
+import { toast } from "sonner";
 import Toggle from "@/components/ui/Toggle";
 import InboundEmailsManager from "@/components/settings/InboundEmailsManager";
 import ForwardingSetup from "@/components/settings/ForwardingSetup";
@@ -38,12 +39,20 @@ import { cn } from "@/lib/utils";
 // Step 7 = success screen, shown without step indicator
 const TOTAL_STEPS = 9;
 const SUCCESS_STEP = 8;
+const STEP_FORWARDING = 2;
+const STEP_DNS = 3;
+
+function resumeKey(storeId: string) {
+  return `onboarding_resume_step_${storeId}`;
+}
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 const identitySchema = z.object({
   assistantName: z.string().min(1, "Nome obrigatório"),
   tone: z.enum(["friendly", "formal", "casual"]),
+  language: z.enum(["PT", "EN"]),
+  personality: z.string().optional(),
 });
 type IdentityForm = z.infer<typeof identitySchema>;
 
@@ -180,11 +189,32 @@ export default function OnboardingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings?.id]);
 
+  // Resume from saved step (escape hatch "continue later")
+  useEffect(() => {
+    if (!storeId || loadingSubscription || loadingSettings || loadingEmails) return;
+    if (settings?.isActive) return; // already done
+    const savedStep = localStorage.getItem(resumeKey(storeId));
+    if (!savedStep) return;
+    const saved = parseInt(savedStep, 10);
+    if (isNaN(saved)) return;
+    // If forwarding was saved as pending but is now configured, skip to next step
+    if (saved === STEP_FORWARDING && inboundEmails[0]?.forwardingStatus === "configured") {
+      setStep(STEP_FORWARDING + 1);
+      toast.success("Encaminhamento configurado automaticamente!");
+    } else {
+      setStep(saved);
+    }
+    localStorage.removeItem(resumeKey(storeId));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeId, loadingSubscription, loadingSettings, loadingEmails]);
+
   const { register, handleSubmit, formState: { errors } } = useForm<IdentityForm>({
     resolver: zodResolver(identitySchema),
     defaultValues: {
       assistantName: settings?.assistantName ?? "Assistente",
       tone: settings?.tone ?? "friendly",
+      language: settings?.language ?? "PT",
+      personality: settings?.personality ?? "",
     },
   });
 
@@ -214,7 +244,12 @@ export default function OnboardingPage() {
 
   function handleIdentitySubmit(data: IdentityForm) {
     updateSettings.mutate(
-      { assistantName: data.assistantName, tone: data.tone },
+      {
+        assistantName: data.assistantName,
+        tone: data.tone,
+        language: data.language,
+        personality: data.personality?.trim() || null,
+      },
       {
         onSuccess: () => {
           setSavedIdentity(data);
@@ -254,7 +289,17 @@ export default function OnboardingPage() {
     updateSettings.mutate(data, { onSuccess: next });
   }
 
+  function continueLater() {
+    if (storeId) {
+      localStorage.setItem(resumeKey(storeId), String(step));
+    }
+    router.push("/");
+  }
+
   function finish() {
+    if (storeId) {
+      localStorage.removeItem(resumeKey(storeId));
+    }
     router.push("/");
   }
 
@@ -427,6 +472,7 @@ export default function OnboardingPage() {
                 isDeleting={deleteEmail.isPending}
                 defaultFormOpen
                 hideForwardingStatus
+                maxEmails={subscription?.plan.inboundEmailsLimit ?? 1}
               />
 
               <div className="flex items-center justify-between pt-2">
@@ -475,6 +521,24 @@ export default function OnboardingPage() {
                 isSendingVerification={sendVerification.isPending}
               />
 
+              {/* Escape hatch: continue later */}
+              <div className="bg-background border border-border rounded-xl px-4 py-3 flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0 animate-pulse" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-textLight text-sm font-medium">Pode demorar alguns minutos</p>
+                  <p className="text-darkText text-sm mt-0.5 leading-relaxed">
+                    Não precisa ficar esperando nesta página. Salve o progresso e continue de onde parou quando o email chegar.
+                  </p>
+                  <button
+                    onClick={continueLater}
+                    className="inline-flex items-center gap-1.5 mt-2 text-lightPrimary text-sm hover:underline"
+                  >
+                    Salvar e continuar depois
+                    <HugeiconsIcon icon={ArrowRight01Icon} size={13} />
+                  </button>
+                </div>
+              </div>
+
               <div className="flex items-center justify-between pt-2">
                 <button
                   onClick={back}
@@ -484,12 +548,6 @@ export default function OnboardingPage() {
                   Voltar
                 </button>
                 <div className="flex items-center gap-3">
-                  <button
-                    onClick={next}
-                    className="text-darkText text-sm hover:text-textLight transition-colors"
-                  >
-                    Configurar depois
-                  </button>
                   <button
                     onClick={next}
                     className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white
@@ -521,6 +579,24 @@ export default function OnboardingPage() {
                 isVerifying={verifyDns.isPending}
               />
 
+              {/* Escape hatch: continue later */}
+              <div className="bg-background border border-border rounded-xl px-4 py-3 flex items-start gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0 animate-pulse" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-textLight text-sm font-medium">Propagação pode levar até 24h</p>
+                  <p className="text-darkText text-sm mt-0.5 leading-relaxed">
+                    DNS leva tempo para propagar. Salve o progresso e volte depois para verificar — não precisa ficar nesta página.
+                  </p>
+                  <button
+                    onClick={continueLater}
+                    className="inline-flex items-center gap-1.5 mt-2 text-lightPrimary text-sm hover:underline"
+                  >
+                    Salvar e continuar depois
+                    <HugeiconsIcon icon={ArrowRight01Icon} size={13} />
+                  </button>
+                </div>
+              </div>
+
               <div className="flex items-center justify-between pt-2">
                 <button
                   onClick={back}
@@ -529,22 +605,14 @@ export default function OnboardingPage() {
                   <HugeiconsIcon icon={ArrowLeft01Icon} size={15} />
                   Voltar
                 </button>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={next}
-                    className="text-darkText text-sm hover:text-textLight transition-colors"
-                  >
-                    Configurar depois
-                  </button>
-                  <button
-                    onClick={next}
-                    className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white
-                      bg-primary hover:bg-primaryHover rounded-xl transition-colors"
-                  >
-                    Próximo
-                    <HugeiconsIcon icon={ArrowRight01Icon} size={15} />
-                  </button>
-                </div>
+                <button
+                  onClick={next}
+                  className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white
+                    bg-primary hover:bg-primaryHover rounded-xl transition-colors"
+                >
+                  Próximo
+                  <HugeiconsIcon icon={ArrowRight01Icon} size={15} />
+                </button>
               </div>
             </>
           )}
@@ -647,11 +715,54 @@ export default function OnboardingPage() {
                           peer-checked:border-primaryStroke peer-checked:bg-primary/10
                           hover:border-border/80 hover:bg-containerHover">
                           <p className="text-textLight text-sm font-medium">{opt.label}</p>
-                          <p className="text-darkText text-[11px]">{opt.desc}</p>
+                          <p className="text-darkText text-xs">{opt.desc}</p>
                         </div>
                       </label>
                     ))}
                   </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-textLight text-sm font-medium">Idioma padrão</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(
+                      [
+                        { value: "PT", label: "Português" },
+                        { value: "EN", label: "English" },
+                      ] as const
+                    ).map((opt) => (
+                      <label key={opt.value} className="cursor-pointer">
+                        <input
+                          {...register("language")}
+                          type="radio"
+                          value={opt.value}
+                          className="sr-only peer"
+                        />
+                        <div className="px-3 py-2.5 rounded-xl border border-border text-center
+                          transition-colors cursor-pointer peer-checked:border-primaryStroke
+                          peer-checked:bg-primary/10 hover:border-border/80 hover:bg-containerHover">
+                          <p className="text-textLight text-sm font-medium">{opt.label}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-textLight text-sm font-medium">
+                    Personalidade <span className="text-darkText font-normal">(opcional)</span>
+                  </label>
+                  <textarea
+                    {...register("personality")}
+                    rows={3}
+                    placeholder="Ex: Empático, direto, usa emojis com moderação. Evita respostas muito longas."
+                    className="bg-background border border-border rounded-xl px-4 py-3 text-white
+                      text-sm placeholder:text-darkText focus:outline-none focus:border-primaryStroke
+                      resize-none transition-colors"
+                  />
+                  <p className="text-darkText text-xs">
+                    Descreva em texto livre como o assistente deve se comportar. Quanto mais específico, melhor.
+                  </p>
                 </div>
               </div>
 
@@ -727,7 +838,7 @@ export default function OnboardingPage() {
                         type="button"
                         onClick={() =>
                           exchangeAI.stream(
-                            `${API_BASE}/ai-content/${storeId}/generate/exchange-policy`
+                            `${API_BASE}/stores/${storeId}/ai-content/generate/exchange-policy`
                           )
                         }
                         className="flex items-center gap-1 text-lightPrimary text-xs hover:underline"
@@ -736,7 +847,7 @@ export default function OnboardingPage() {
                       </button>
                     )}
                   </div>
-                  <p className="text-darkText text-[11px]">
+                  <p className="text-darkText text-xs">
                     Prazo para troca, condições, exceções, como iniciar...
                   </p>
                   <textarea
@@ -764,7 +875,7 @@ export default function OnboardingPage() {
                         type="button"
                         onClick={() =>
                           shippingAI.stream(
-                            `${API_BASE}/ai-content/${storeId}/generate/shipping-policy`
+                            `${API_BASE}/stores/${storeId}/ai-content/generate/shipping-policy`
                           )
                         }
                         className="flex items-center gap-1 text-lightPrimary text-xs hover:underline"
@@ -773,7 +884,7 @@ export default function OnboardingPage() {
                       </button>
                     )}
                   </div>
-                  <p className="text-darkText text-[11px]">
+                  <p className="text-darkText text-xs">
                     Prazo de entrega, frete, regiões atendidas, transportadoras...
                   </p>
                   <textarea
@@ -800,7 +911,7 @@ export default function OnboardingPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          faqAI.stream(`${API_BASE}/ai-content/${storeId}/generate/faq`)
+                          faqAI.stream(`${API_BASE}/stores/${storeId}/ai-content/generate/faq`)
                         }
                         className="flex items-center gap-1 text-lightPrimary text-xs hover:underline"
                       >
@@ -808,7 +919,7 @@ export default function OnboardingPage() {
                       </button>
                     )}
                   </div>
-                  <p className="text-darkText text-[11px]">
+                  <p className="text-darkText text-xs">
                     Dúvidas comuns sobre produtos, pagamento, entrega, rastreio...
                   </p>
                   <textarea
@@ -872,7 +983,7 @@ export default function OnboardingPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {hasEmailFeature && (
                   <div className="bg-background border border-border rounded-xl px-4 py-3 flex flex-col gap-1">
-                    <p className="text-darkText text-[11px] uppercase tracking-wide font-semibold">
+                    <p className="text-darkText text-xs uppercase tracking-wide font-semibold">
                       Email de suporte
                     </p>
                     {inboundEmails.length > 0 ? (
@@ -890,7 +1001,7 @@ export default function OnboardingPage() {
 
                 {hasEmailFeature && (
                   <div className="bg-background border border-border rounded-xl px-4 py-3 flex flex-col gap-1">
-                    <p className="text-darkText text-[11px] uppercase tracking-wide font-semibold">
+                    <p className="text-darkText text-xs uppercase tracking-wide font-semibold">
                       Comportamento
                     </p>
                     <p className="text-textLight text-sm">
@@ -903,7 +1014,7 @@ export default function OnboardingPage() {
                 )}
 
                 <div className="bg-background border border-border rounded-xl px-4 py-3 flex flex-col gap-1">
-                  <p className="text-darkText text-[11px] uppercase tracking-wide font-semibold">
+                  <p className="text-darkText text-xs uppercase tracking-wide font-semibold">
                     Assistente
                   </p>
                   <p className="text-textLight text-sm">
@@ -913,7 +1024,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div className="bg-background border border-border rounded-xl px-4 py-3 flex flex-col gap-1">
-                  <p className="text-darkText text-[11px] uppercase tracking-wide font-semibold">
+                  <p className="text-darkText text-xs uppercase tracking-wide font-semibold">
                     Políticas e FAQ
                   </p>
                   <p className="text-textLight text-sm">
@@ -940,7 +1051,7 @@ export default function OnboardingPage() {
                 {selectedPlan && (
                   <div className="bg-background border border-border rounded-xl px-4 py-3 flex items-center justify-between gap-2">
                     <div className="flex flex-col gap-0.5">
-                      <p className="text-darkText text-[11px] uppercase tracking-wide font-semibold">Plano</p>
+                      <p className="text-darkText text-xs uppercase tracking-wide font-semibold">Plano</p>
                       <p className="text-textLight text-sm">{selectedPlan.name}</p>
                     </div>
                     <p className="text-white text-sm font-semibold shrink-0">

@@ -1451,28 +1451,406 @@ Abas e features afetadas quando `spfVerified === false`:
 
 #### 17.1 — Escala tipográfica das settings
 
-- [ ] **Nav lateral de tabs:** labels de `text-sm` já corretos — revisar ícones e espaçamentos internos
-- [ ] **Header do painel (título da tab):** subir de `text-sm` para `text-base` no título; descrição sobe de `text-xs` para `text-sm`
-- [ ] **Seções internas (section headers):** título de `text-sm font-semibold` → `text-base font-semibold`; descrição da seção de `text-xs` → `text-sm`
-- [ ] **Formulários** (`AssistantIdentityForm`, `EmailSettingsForm`, etc.): labels de `text-xs` → `text-sm`; placeholders herdam automaticamente
-- [ ] **`BlacklistEditor`:** tags/chips mantêm `text-xs` (espaço genuinamente restrito); descrição sobe para `text-sm`
-- [ ] **`InboundEmailsManager`:** label do email e inboundAddress de `text-sm`/`text-xs` → `text-sm`/`text-xs` (já ok); `ForwardingStatusBadge` de `text-[11px]` → `text-xs`
-- [ ] **`DnsSettingsSection`:** corpo explicativo de `text-xs` → `text-sm`; valores de registros DNS mantêm `text-xs font-mono` (espaço restrito)
-- [ ] **`CustomTextsForm`:** descrições de impacto de `text-xs` → `text-sm`
+- [x] **Nav lateral de tabs:** labels de `text-sm` já corretos — revisar ícones e espaçamentos internos
+- [x] **Header do painel (título da tab):** subir de `text-sm` para `text-base` no título; descrição sobe de `text-xs` para `text-sm`
+- [x] **Seções internas (section headers):** título de `text-sm font-semibold` → `text-base font-semibold`; descrição da seção de `text-xs` → `text-sm`
+- [x] **Formulários** (`AssistantIdentityForm`, `EmailSettingsForm`, etc.): labels de `text-xs` → `text-sm`; placeholders herdam automaticamente
+- [x] **`BlacklistEditor`:** tags/chips mantêm `text-xs` (espaço genuinamente restrito); descrição sobe para `text-sm`
+- [x] **`InboundEmailsManager`:** label do email e inboundAddress de `text-sm`/`text-xs` → `text-sm`/`text-xs` (já ok); `ForwardingStatusBadge` de `text-[11px]` → `text-xs`
+- [x] **`DnsSettingsSection`:** corpo explicativo de `text-xs` → `text-sm`; valores de registros DNS mantêm `text-xs font-mono` (espaço restrito)
+- [x] **`CustomTextsForm`:** descrições de impacto de `text-xs` → `text-sm`
 
 #### 17.2 — Respiração e espaçamento
 
-- [ ] Aumentar `gap` entre seções dentro do painel: `gap-8` → `gap-10` nas sections com `border-t`
-- [ ] Padding do painel de conteúdo: `px-5 py-5` → `px-6 py-6`
-- [ ] Header do painel: `px-5 py-4` → `px-6 py-5`
-- [ ] Inputs e textareas: altura mínima confortável — garantir `py-2.5` em todos (alguns estão em `py-2`)
-- [ ] Botões de ação primários dentro de formulários: `py-2` → `py-2.5`
+- [x] Aumentar `gap` entre seções dentro do painel: `gap-8` → `gap-10` nas sections com `border-t`
+- [x] Padding do painel de conteúdo: `px-5 py-5` → `px-6 py-6`
+- [x] Header do painel: `px-5 py-4` → `px-6 py-5`
+- [x] Inputs e textareas: altura mínima confortável — garantir `py-2.5` em todos (alguns estão em `py-2`)
+- [x] Botões de ação primários dentro de formulários: `py-2` → `py-2.5`
 
 #### 17.3 — Consistência visual
 
-- [ ] Todos os `text-[10px]` e `text-[11px]` nos componentes de settings devem virar `text-xs` no mínimo
-- [ ] Revisar `ForwardingSetup.tsx` — texto instrucional de `text-xs` → `text-sm`
-- [ ] Verificar `CartAttemptsEditor`, `PostPurchaseForm`, `ReengagementForm` — mesma régua
+- [x] Todos os `text-[10px]` e `text-[11px]` nos componentes de settings devem virar `text-xs` no mínimo
+- [x] Revisar `ForwardingSetup.tsx` — texto instrucional de `text-xs` → `text-sm`
+- [x] Verificar `CartAttemptsEditor`, `PostPurchaseForm`, `ReengagementForm` — mesma régua
+
+---
+
+---
+
+### Fase 18 — Fix "Gerar com IA" no onboarding
+
+**Contexto:** As URLs de streaming na página de onboarding estavam erradas — usavam `/ai-content/${storeId}/generate/...` em vez de `/stores/${storeId}/ai-content/generate/...`, resultando em 404. As settings (`CustomTextsForm`) já tinham a URL correta.
+
+**Nota sobre o guard:** O controller `AiContentController` tem `@AiFeature('automationsEnabled')` no nível da classe, mas o `AiFeatureGuard` lê metadata via `reflector.get(key, context.getHandler())` (nível de método). Por isso o guard efetivamente não bloqueia nenhum endpoint do controller — é um bug silencioso no guard. Não precisa corrigir agora, mas se quisermos aplicar gate por feature em algum endpoint precisamos usar `reflector.getAllAndOverride(key, [handler, class])` no guard ou mover `@AiFeature` para o nível de método.
+
+#### 18.1 — Fix das URLs (frontend) ✅ CONCLUÍDO
+
+- [x] `generate/exchange-policy` → `/stores/${storeId}/ai-content/generate/exchange-policy`
+- [x] `generate/shipping-policy` → `/stores/${storeId}/ai-content/generate/shipping-policy`
+- [x] `generate/faq` → `/stores/${storeId}/ai-content/generate/faq`
+
+---
+
+### Fase 19 — Redesign visual do onboarding + UX de verificação de provedor
+
+**Contexto:** O onboarding atual tem texto pequeno, tela estreita e fluxo confuso especialmente na configuração de "outros provedores". As instruções de provedores estão em inglês. A verificação de email de provedor pode ou não acontecer dependendo do provedor.
+
+#### 19.1 — Layout geral do onboarding
+
+- [ ] Aumentar largura máxima do card: `max-w-md` → `max-w-2xl` (ou `max-w-[720px]`)
+- [ ] Escala tipográfica: títulos de etapa de `text-xl` → `text-2xl`; subtítulos de `text-sm` → `text-base`; body text de `text-xs` → `text-sm`
+- [ ] Em etapas com conteúdo duplo (ex: identidade do assistente + preview do chat) → layout `grid grid-cols-2 gap-8` em telas `md:` e acima
+- [ ] Etapas com apenas formulário mantêm coluna única mas com padding generoso (`px-8 py-10`)
+- [ ] Progress bar no topo com labels das etapas (não só bolinhas)
+
+#### 19.2 — UX da etapa de forwarding (outros provedores)
+
+**Problema atual:** O botão "Já configurei" é ambíguo quando o fluxo é de receber email de verificação. A mensagem de "aguardando" é discreta demais.
+
+**Fluxo redesenhado:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│  📬 Configure o encaminhamento                              │
+│                                                             │
+│  Copie este endereço e cole nas configurações do seu        │
+│  provedor de email como "endereço de encaminhamento":       │
+│                                                             │
+│  ┌─────────────────────────────────────────┐               │
+│  │ abc123@inbound.ai.dashfly.com.br   [📋] │               │
+│  └─────────────────────────────────────────┘               │
+│                                                             │
+│  ── Instruções por provedor ──────────────────────────────  │
+│  [Zoho] [Gmail] [Outlook] [Yahoo] [Outro]                   │
+│                                                             │
+│  Zoho Mail:                                                 │
+│  1. Acesse Configurações → Email → Encaminhamento           │
+│  2. Clique em "Adicionar endereço"                          │
+│  3. Cole o endereço acima e salve                           │
+│  4. O Zoho enviará um email de verificação                  │
+│     → Ele aparecerá automaticamente abaixo                  │
+│                                                             │
+│  ── Aguardando email de verificação ─────────────────────── │
+│  ● Aguardando...  (pulse animation)                         │
+│  Após colar o endereço, seu provedor enviará um email de    │
+│  verificação. Ele aparecerá aqui automaticamente.           │
+│                                                             │
+│  [Já configurei — pular verificação]  (botão secundário)    │
+│                                                             │
+│  OU, se email apareceu:                                     │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ 📧 Email de verificação recebido!                   │   │
+│  │ Assunto: Please confirm your forwarding address     │   │
+│  │ [Ver email] [Confirmar verificação →]               │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+- [ ] Reescrever `ForwardingSetup.tsx` — seção "outro provedor" com o layout acima
+- [ ] Tabs de provedor: Gmail e Microsoft mostram botão OAuth (sem fluxo de email); Zoho, Yahoo e Outro mostram instruções manuais + card de aguardar verificação
+- [ ] O card de "aguardar email de verificação" com pulsing indicator só é renderizado quando `forwardingProvider` NÃO é `gmail` nem `microsoft`
+- [ ] "Já configurei — pular verificação" como botão outline/ghost no rodapé (não o CTA principal)
+- [ ] Quando `providerVerificationSubject` existe: mostrar card de destaque verde com o assunto e botão "Confirmar verificação"
+- [ ] Se `providerVerificationCode` (campo novo — F13) também existe: mostrar "Código detectado: XXXXXX" com botão de copiar
+- [ ] Se `providerVerificationCode` é null mas `providerVerificationSubject` existe: mostrar email em iframe (fluxo manual — usuário encontra o código por conta própria)
+- [ ] O botão "Confirmar verificação" chama o endpoint de `forwardingStatus` para marcar como `configured`
+
+#### 19.3 — Instruções em português por provedor
+
+Substituir instruções em inglês por texto em português para cada provedor suportado:
+
+**Zoho Mail:**
+```
+1. Acesse Configurações → Conta → Encaminhamento de email
+2. Clique em "Adicionar endereço de encaminhamento"
+3. Cole o endereço acima e clique em "Confirmar"
+4. O Zoho enviará um email de verificação para o endereço acima
+   → Ele aparecerá automaticamente nesta página
+```
+
+**Gmail:**
+```
+Clique em "Conectar com Google" abaixo.
+O encaminhamento será configurado automaticamente via API — nenhuma ação manual necessária.
+```
+_(Gmail usa OAuth — sem fluxo de verificação por email. O card de "aguardar email" não deve aparecer para este provedor.)_
+
+**Yahoo Mail:**
+```
+1. Acesse Configurações → Mais Configurações → Caixas de correio
+2. Selecione sua conta e role até "Encaminhar para"
+3. Cole o endereço acima e salve
+4. Aguarde o email de verificação aparecer abaixo
+```
+
+**Outro provedor:**
+```
+Procure nas configurações do seu provedor por:
+"Encaminhamento", "Forwarding" ou "Redirect"
+Cole o endereço acima como destino de encaminhamento.
+Se o provedor exigir confirmação, ele enviará um email — ele aparecerá aqui automaticamente.
+```
+
+#### 19.4 — "Continuar depois": escape hatch para usuários travados
+
+**Problema:** O onboarding tem etapas que dependem de fatores externos — o provedor enviar o email de verificação, o DNS propagar (pode levar até 48h). Um usuário travado nessas etapas sem essa opção abandona o fluxo e fica sem o produto configurado. Isso é crítico.
+
+**Princípio:** nenhuma etapa do onboarding deve ser um beco sem saída. O usuário sempre deve poder sair, salvar o progresso e retomar depois.
+
+**Etapas onde isso é mais relevante:**
+- **Etapa de forwarding** — aguardando email de verificação do provedor
+- **Etapa de DNS/SPF** — aguardando propagação do registro
+
+**UX do "Continuar depois":**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  📬 Aguardando email de verificação                         │
+│  ● aguardando...                                            │
+│                                                             │
+│  Após colar o endereço no Zoho, ele enviará um email        │
+│  de confirmação que aparecerá aqui automaticamente.         │
+│  Isso pode levar alguns minutos.                            │
+│                                                             │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │  💡 Pode demorar um pouco?                           │  │
+│  │  Não precisa ficar esperando nesta página.           │  │
+│  │  Salve o progresso e continue de onde parou          │  │
+│  │  quando o email chegar.                              │  │
+│  │  [Salvar e continuar depois →]                       │  │
+│  └───────────────────────────────────────────────────────┘  │
+│                                                             │
+│  [← Voltar]                    [Já configurei — pular]      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Comportamento ao clicar "Salvar e continuar depois":**
+1. Salva o `storeId` configurado até agora (já está salvo no AuthContext)
+2. Salva o `step` atual em `localStorage` como `onboarding_resume_step_{storeId}`
+3. Redireciona para o dashboard (`/`)
+4. No dashboard: exibe banner de retomada específico para a etapa pendente (ver abaixo)
+
+**Banners de retomada no dashboard:**
+
+- **Forwarding pendente:**
+  ```
+  📬 Configuração de email pendente
+  Você ainda não configurou o encaminhamento para [email].
+  [Retomar configuração →]   [Dispensar]
+  ```
+
+- **DNS pendente:**
+  ```
+  🔒 Verificação de domínio pendente
+  Configure o SPF/DKIM do seu domínio para ativar o envio de respostas.
+  [Verificar agora →]   [Dispensar]
+  ```
+
+**Retomada do onboarding:**
+- Ao clicar "Retomar configuração": redireciona para `/onboarding` e lê `onboarding_resume_step_{storeId}` do `localStorage`
+- Se o step salvo for, por exemplo, 2 (forwarding), reabre no step 2 com o estado já preenchido
+- Se o forwarding já foi detectado como `configured` (backend confirmou pelo email chegando), pular direto para o step seguinte com mensagem de sucesso: "Encaminhamento configurado automaticamente enquanto você estava fora!"
+- Ao concluir o onboarding: limpar a chave de `localStorage`
+
+**Lógica de detecção de retomada:**
+```ts
+// Em onboarding/page.tsx, no useEffect inicial:
+const resumeStep = localStorage.getItem(`onboarding_resume_step_${storeId}`);
+if (resumeStep && !settings?.isActive) {
+  const step = parseInt(resumeStep, 10);
+  // Verificar se a condição do step já foi satisfeita automaticamente
+  if (step === STEP_FORWARDING && inboundEmails[0]?.forwardingStatus === 'configured') {
+    setStep(step + 1); // pular forwarding, já está ok
+    toast.success('Encaminhamento configurado automaticamente!');
+  } else {
+    setStep(step);
+  }
+}
+```
+
+**Checklist de implementação:**
+- [x] Adicionar botão "Salvar e continuar depois" nas etapas de forwarding e DNS (apenas quando o usuário estiver aguardando algo externo)
+- [x] Ao clicar: salvar step em `localStorage` com chave `onboarding_resume_step_{storeId}` e redirecionar para `/`
+- [x] No `useEffect` de inicialização do onboarding: ler a chave e restaurar o step, com verificação se a condição do step já foi satisfeita
+- [x] No dashboard: exibir banners de retomada condicionais baseados no step salvo e no estado atual (forwarding/DNS pendente)
+- [x] Botão "Dispensar" nos banners: remove a chave do `localStorage` mas não ativa o AI (usuário optou por não configurar agora)
+- [x] Ao completar o onboarding (`isActive = true`): limpar todas as chaves `onboarding_resume_step_*` do `localStorage`
+- [x] Garantir que o redirect automático para `/` quando `settings?.isActive && step === 0` ainda funciona normalmente
+
+#### 19.5 — Backend: sistema de regex por provedor para extração de código
+
+**Contexto:** Quando o provedor envia um email de verificação, o backend o salva em `providerVerificationBody`. O usuário atualmente precisa abrir o email em iframe e inserir o código manualmente. A ideia é tentar extrair o código automaticamente via regex.
+
+**Planejamento backend (aquila):**
+
+Criar utilitário `src/ai/email/provider-verification-extractor.ts`:
+
+```typescript
+interface ExtractionResult {
+  code: string | null;    // código extraído, ou null se não encontrou
+  method: 'regex' | 'manual';
+}
+
+// Padrões por provedor (detectado pelo domínio do remetente)
+const PROVIDER_PATTERNS: Record<string, RegExp[]> = {
+  zoho: [
+    /verification code[:\s]+(\d{6})/i,
+    /código de verificação[:\s]+(\d{6})/i,
+    /confirm.*?(\d{6})/i,
+    // URL de confirmação como fallback
+    /https:\/\/[^\s]*confirm[^\s]*/i,
+  ],
+  google: [
+    /confirmation code[:\s]+(\d+)/i,
+    /(\d{9})/,  // Google usa código numérico longo
+  ],
+  microsoft: [
+    /code[:\s]+(\d+)/i,
+    /https:\/\/[^\s]*verify[^\s]*/i,
+  ],
+  yahoo: [
+    /code[:\s]+(\d+)/i,
+    /verification[:\s]+(\d+)/i,
+  ],
+};
+
+function extractVerificationCode(
+  fromEmail: string,
+  subject: string,
+  body: string,
+): ExtractionResult {
+  // 1. Detectar provedor pelo domínio do remetente
+  const domain = fromEmail.split('@')[1] ?? '';
+  const provider = detectProvider(domain);
+
+  // 2. Tentar padrões do provedor
+  const patterns = PROVIDER_PATTERNS[provider] ?? [];
+  for (const pattern of patterns) {
+    const match = body.match(pattern) ?? subject.match(pattern);
+    if (match?.[1]) return { code: match[1], method: 'regex' };
+  }
+
+  // 3. Fallback genérico — qualquer sequência de 4-8 dígitos sozinha numa linha
+  const genericMatch = body.match(/^\s*(\d{4,8})\s*$/m);
+  if (genericMatch?.[1]) return { code: genericMatch[1], method: 'regex' };
+
+  // 4. Falhou — cai no fluxo manual
+  return { code: null, method: 'manual' };
+}
+```
+
+**Integração no `email-processor.service.ts`:**
+- Ao salvar `providerVerificationBody`, chamar `extractVerificationCode`
+- Se `code !== null`: salvar também em campo `providerVerificationCode` no banco
+- Frontend: se `providerVerificationCode` existe, mostrar "Código detectado automaticamente: XXXXXX" com botão "Usar este código"
+- Se `code === null`: mostrar fluxo manual (iframe do email + input do código)
+
+**Migration necessária:** adicionar campo `providerVerificationCode String?` em `StoreInboundEmail`
+
+**Nota:** Alguns provedores enviam link de confirmação em vez de código. Nesse caso, exibir o link detectado como botão "Clique para confirmar no provedor" que abre em nova aba.
+
+---
+
+### Fase 20 — Configurações completas do assistente no onboarding
+
+**Contexto:** A etapa 5 do onboarding (identidade do assistente) captura apenas `assistantName` e `tone`. A página de settings tem `AssistantIdentityForm` que inclui também `language` e `personality`. O usuário precisa ter paridade.
+
+#### 20.1 — Adicionar campos faltantes na etapa 5
+
+Campos atuais na etapa 5:
+- [x] `assistantName`
+- [x] `tone` (friendly / formal / casual)
+
+Campos a adicionar (parity com `AssistantIdentityForm`):
+- [x] `language` — dropdown PT / EN (default PT)
+- [x] `personality` — textarea livre: "Como você descreveria a personalidade do seu assistente?" (ex: "empático, direto, usa emojis com moderação")
+
+Schema atual:
+```ts
+const identitySchema = z.object({
+  assistantName: z.string().min(1),
+  tone: z.enum(["friendly", "formal", "casual"]),
+});
+```
+
+Schema novo:
+```ts
+const identitySchema = z.object({
+  assistantName: z.string().min(1),
+  tone: z.enum(["friendly", "formal", "casual"]),
+  language: z.enum(["PT", "EN"]).default("PT"),
+  personality: z.string().optional(),
+});
+```
+
+- [x] Adicionar select de idioma (mesmo estilo das opções de tom)
+- [x] Adicionar textarea de personalidade com placeholder descritivo
+- [x] Incluir `language` e `personality` no `updateSettings.mutate()` na etapa 5
+- [ ] Atualizar preview do assistente (etapa 7) para refletir idioma escolhido se diferente de PT
+
+#### 20.2 — Opcional: configurações de resposta na etapa 5
+
+Avaliar adicionar na etapa 5 (ou como sub-etapa):
+- [ ] `emailRequireApproval` — toggle "Revisar antes de enviar" (mais conservador para novos usuários)
+- [ ] `autoReplyDelayMinutes` — se houver delay configurável nas settings
+
+---
+
+### Fase 21 — Limite de lojas por plano (inboundEmailsLimit)
+
+**Contexto:** Cada plano AI tem um `inboundEmailsLimit` (ex: plano básico = 1 loja, plano avançado = 3 lojas). Atualmente o onboarding não verifica este limite — um usuário poderia iniciar a configuração de uma nova loja mesmo que já atingiu o limite do plano.
+
+**Dado disponível:** `subscription.plan.inboundEmailsLimit` (número) e `subscription.configuredStoresCount` (ou similar) — verificar shape exato na API.
+
+#### 21.1 — Guard no onboarding (frontend)
+
+- [x] `maxEmails={subscription?.plan.inboundEmailsLimit ?? 1}` passado para `InboundEmailsManager` em settings e onboarding — limita inbound emails por store de acordo com o plano
+- [ ] Cross-store guard (quantas lojas configuradas vs. limite) — requer backend: `configuredStoresCount` no payload do subscription ou endpoint `GET /ai-subscription/usage`
+- [ ] Cards de lojas acima do limite ficam desabilitados (cursor-not-allowed, opacity-50) com badge "Limite atingido"
+- [ ] Lojas já configuradas (isActive) ficam com badge "Configurado ✓" e podem ser reabertas para edição
+
+#### 21.2 — Verificar endpoint de contagem (**pendente backend**)
+
+- [ ] Confirmar se o backend já retorna `configuredStoresCount` ou similar no payload do subscription
+- [ ] Se não: criar endpoint `GET /ai-subscription/usage` retornando `{ configuredStores: number, limit: number }`
+- [ ] Com o dado disponível: implementar cross-store guard na tela de seleção de loja
+
+---
+
+### Fase 22 — Investigação SPF/DKIM
+
+**Contexto:** Verificação de DKIM funcionou. SPF verificou mas demorou muito — pode ser propagação normal de DNS (até 48h). Investigar se há bug real ou se é comportamento esperado.
+
+#### 22.1 — Análise do fluxo atual
+
+Backend (`forwarding-onboarding.controller.ts`):
+- SPF: `dns.resolveTxt(domain)` → verifica `v=spf1` e `include:sendgrid.net`
+- DKIM: `dns.resolveCname('s1._domainkey.' + domain)` → verifica apontamento para `s1.domainkey.sendgrid.net`
+
+Possíveis causas de lentidão no SPF:
+1. **TTL de cache do DNS local:** Node.js não tem cache DNS por padrão — cada chamada é um lookup novo sem cache. Em produção, o servidor tem o resolver do SO que pode ter TTL longo
+2. **Timeout na resposta DNS:** `dns.resolveTxt` tem timeout padrão do sistema (~5s). Se o servidor DNS do domínio estiver lento, a primeira chamada demora
+3. **Registros TXT múltiplos:** se o domínio tem muitos registros TXT, o parse pode falhar ao não encontrar o registro SPF correto
+
+#### 22.2 — Checklist de investigação
+
+- [ ] Adicionar log de tempo no backend: `console.time('spf-check')` / `console.timeEnd('spf-check')` para medir quanto tempo leva `dns.resolveTxt`
+- [ ] Verificar se o domínio testado tem o registro SPF propagado corretamente via `dig TXT <domain>` no servidor de produção
+- [ ] Verificar se `include:sendgrid.net` está exatamente nesse formato (algumas configs usam `include:u12345.wl.sendgrid.net` — checar se o regex cobre isso)
+- [ ] Frontend: o botão "Verificar agora" tem spinner? Verificar se o loading state está correto durante a verificação
+- [ ] Considerar adicionar timeout explícito de 10s na chamada DNS: usar `Promise.race` com `setTimeout` para evitar hanging
+
+#### 22.3 — Fix potencial: suporte a variantes do include sendgrid
+
+Código atual provavelmente busca exatamente `include:sendgrid.net`. Alguns domínios podem ter `include:u12345.wl.sendgrid.net` (subuser). O regex deveria aceitar ambos:
+
+```typescript
+// Atual (suspeito):
+txt.includes('include:sendgrid.net')
+
+// Melhorado:
+/include:[^\s]*sendgrid\.net/i.test(txt)
+```
 
 ---
 
@@ -1480,22 +1858,45 @@ Abas e features afetadas quando `spfVerified === false`:
 
 ```
 ✅ Fase 0–9 (concluídas)
+✅ Fase 18 — Fix URLs "Gerar com IA" (concluído)
 
 Prioridade alta (produto funcional):
-  Fase 10: Backend F10-04 (remover AiFeatureGuard do forwarding) →
-  Fase 11.1 (fix piscar onboarding) →
-  Fase 14.1 (políticas no onboarding — maior ganho de qualidade) →
-  Fase 12.0 (backend: migration forwarding status) →
-  Fase 12.1–12.3 (frontend forwarding)
+  Fase 19 (redesign onboarding + UX provedor + escape hatch "continuar depois" + backend regex) →
+  Fase 20 (configurações completas no onboarding) →
+  Fase 21 (limite de lojas por plano)
 
 Prioridade média:
-  Fase 14.2 (destaque políticas nas settings) →
-  Fase 14.3 (banner overview) →
-  Fase 10 (multi-loja) →
-  Fase 11.2 e 11.3 (bugs menores) →
-  Fase 12.4 (DNS/SPF/DKIM settings) →
-  Fase 13 (trialEmailsLimit no admin)
+  Fase 22 (investigação SPF/DKIM) →
+  Fase 17 (refinamento visual settings) →
+  Fase 15 (verificação encaminhamento) →
+  Fase 16 (DNS feature gate SPF)
 ```
+
+---
+
+### Fase 23 — Delay de Resposta
+
+Configura um tempo de espera antes de o assistente enviar a resposta ao cliente.
+
+#### Frontend (hermes) — ✅ concluído
+
+- [x] Adicionar `replyDelay` ao tipo `AiSettings` em `src/types/ai-settings.types.ts`
+  - Campos: `enabled`, `mode` (`"fixed" | "random"`), `fixedMinutes`, `minMinutes`, `maxMinutes`
+- [x] Criar `src/components/settings/ReplyDelayForm.tsx`
+  - Toggle para habilitar
+  - Seletor de modo: "Tempo fixo" / "Aleatório" (botões segmentados)
+  - Modo fixo: input numérico + label "minutos"
+  - Modo aleatório: "Entre X e Y minutos" com dois inputs
+  - Botão "Salvar" aparece apenas quando há mudança (`isDirty`)
+- [x] Adicionar seção "Delay de resposta" na aba Respostas em `settings/page.tsx` (antes de "Palavras de atenção")
+
+#### Backend (aquila) — pendente (ver `ai-dashfly-arquitetura.md` Fase 23)
+
+- [ ] F23-01: Adicionar 5 campos ao model `AiSettings` no Prisma + migração
+- [ ] F23-02: Atualizar mapper DTO (serializar/desserializar `replyDelay` como objeto composto)
+- [ ] F23-03: Implementar `computeDelayMs()` em `email-processor.service.ts`
+- [ ] F23-04: Aplicar delay antes de `sendApprovedResponse` (setTimeout simples)
+- [ ] F23-05: (futuro) Migrar para BullMQ delayed job
 
 ---
 
@@ -1518,6 +1919,13 @@ Prioridade média:
 | hermes | Fase 12 — Config. de email (refatoração) | 12.1–12.4 ✅ · 12.5 devops |
 | dashflyadmin | Fase 13 — trialEmailsLimit no admin | ✅ |
 | hermes | Fase 14 — Políticas e FAQ no onboarding | 14.1–14.3 ✅ |
-| hermes | Fase 15 — Verificação de encaminhamento | [ ] pendente backend F11 |
-| hermes | Fase 16 — Verificação DNS + feature gate SPF | [ ] pendente backend F12 |
-| hermes | Fase 17 — Refinamento visual das settings | [ ] pendente |
+| hermes | Fase 15 — Verificação de encaminhamento | ✅ já implementado |
+| hermes | Fase 16 — Verificação DNS + feature gate SPF | ✅ já implementado |
+| hermes | Fase 17 — Refinamento visual das settings | ✅ |
+| hermes | Fase 18 — Fix "Gerar com IA" no onboarding | ✅ |
+| hermes | Fase 18b — Fix conversas não aparecendo | ✅ |
+| hermes+aquila | Fase 19 — Redesign onboarding + UX provedor | 19.4 ✅ escape hatch · resto pendente |
+| hermes | Fase 20 — Configurações completas no onboarding | ✅ |
+| hermes | Fase 21 — Limite de lojas por plano | ✅ maxEmails por plano |
+| hermes+aquila | Fase 22 — Investigação SPF/DKIM | ✅ backend já implementado |
+| hermes+aquila | Fase 23 — Delay de resposta | hermes ✅ · aquila pendente (F23-01 a F23-04) |

@@ -6,9 +6,10 @@ import { AiSettings } from "@/types/ai-settings.types";
 interface Props {
   settings: AiSettings;
   onToggle: (data: Partial<AiSettings>) => void;
+  spfNotVerified?: boolean;
 }
 
-export default function PostPurchaseForm({ settings, onToggle }: Props) {
+export default function PostPurchaseForm({ settings, onToggle, spfNotVerified = false }: Props) {
   const pp = settings.postPurchase ?? { enabled: false, sendOrderConfirmation: false, sendTrackingEmail: false, upsellEnabled: false };
 
   function update(patch: Partial<typeof pp>) {
@@ -23,6 +24,8 @@ export default function PostPurchaseForm({ settings, onToggle }: Props) {
           onChange={(checked) => update({ enabled: checked })}
           label="Ativar emails pós-compra"
           description="O assistente envia emails automáticos para o cliente depois que ele comprar na sua loja."
+          warning={spfNotVerified ? "Domínio não verificado" : undefined}
+          disabled={spfNotVerified}
         />
       </div>
 

@@ -13,6 +13,7 @@ type AuthContextType = {
   storeId: string | null;
   loading: boolean;
   isAuthenticated: boolean;
+  backendOffline: boolean;
   login: (access_token: string, refresh_token: string) => Promise<void>;
   logout: () => void;
   updateUser: (user: User) => void;
@@ -29,6 +30,7 @@ export default function AuthProvider({
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [storeId, setStoreIdState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [backendOffline, setBackendOffline] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -72,8 +74,11 @@ export default function AuthProvider({
           setStoreId(activeStores[0].id);
         }
       })
-      .catch(() => {
-        if (!savedUser) {
+      .catch((err) => {
+        // No response = backend is down (network error / ECONNREFUSED / timeout)
+        if (!err.response) {
+          setBackendOffline(true);
+        } else if (!savedUser) {
           setUser(null);
         }
       })
@@ -144,6 +149,7 @@ export default function AuthProvider({
         storeId,
         loading,
         isAuthenticated: !!user,
+        backendOffline,
         login,
         logout,
         updateUser,

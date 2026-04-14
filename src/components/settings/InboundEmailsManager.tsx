@@ -53,7 +53,7 @@ function ForwardingStatusBadge({
 }) {
   if (status === "configured") {
     return (
-      <span className="flex items-center gap-1 text-greenAlert text-[11px]">
+      <span className="flex items-center gap-1 text-greenAlert text-xs">
         <HugeiconsIcon icon={CheckmarkCircle01Icon} size={11} />
         Encaminhamento ativo
       </span>
@@ -65,14 +65,14 @@ function ForwardingStatusBadge({
         ? "Aguardando confirmação do Google"
         : "Verificando encaminhamento...";
     return (
-      <span className="flex items-center gap-1 text-yellowAlert text-[11px]">
+      <span className="flex items-center gap-1 text-yellowAlert text-xs">
         <HugeiconsIcon icon={Clock01Icon} size={11} />
         {label}
       </span>
     );
   }
   return (
-    <span className="flex items-center gap-1 text-yellowAlert text-[11px]">
+    <span className="flex items-center gap-1 text-yellowAlert text-xs">
       <HugeiconsIcon icon={AlertCircleIcon} size={11} />
       Encaminhamento não configurado
     </span>
@@ -166,7 +166,7 @@ export default function InboundEmailsManager({
                           <span className="text-textLight">{email.fromAddress}</span>
                         </p>
                         <div className="flex items-center gap-1.5 mt-1">
-                          <p className="text-darkText text-[11px] truncate max-w-48">
+                          <p className="text-darkText text-xs truncate max-w-48">
                             Endereço Dashfly: {email.inboundAddress}
                           </p>
                           <button

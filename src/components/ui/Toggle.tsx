@@ -9,6 +9,7 @@ interface ToggleProps {
   disabled?: boolean;
   label?: string;
   description?: string;
+  warning?: string;
   className?: string;
 }
 
@@ -18,6 +19,7 @@ export default function Toggle({
   disabled = false,
   label,
   description,
+  warning,
   className,
 }: ToggleProps) {
   return (
@@ -37,26 +39,33 @@ export default function Toggle({
         </div>
       )}
 
-      <Switch
-        checked={checked ?? false}
-        onChange={onChange}
-        disabled={disabled}
-        className={cn(
-          "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors duration-200",
-          "focus:outline-none focus-visible:ring-2 focus-visible:ring-primaryStroke",
-          checked
-            ? "bg-primary border-primaryStroke/50"
-            : "bg-container border-border",
-          disabled && "opacity-40 cursor-not-allowed"
+      <div className="flex items-center gap-2 shrink-0">
+        {warning && (
+          <span className="text-yellowAlert text-xs font-medium whitespace-nowrap">
+            {warning}
+          </span>
         )}
-      >
-        <span
+        <Switch
+          checked={checked ?? false}
+          onChange={onChange}
+          disabled={disabled}
           className={cn(
-            "inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform duration-200",
-            checked ? "translate-x-[18px]" : "translate-x-[3px]"
+            "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors duration-200",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-primaryStroke",
+            checked
+              ? "bg-primary border-primaryStroke/50"
+              : "bg-container border-border",
+            disabled && "opacity-40 cursor-not-allowed"
           )}
-        />
-      </Switch>
+        >
+          <span
+            className={cn(
+              "inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform duration-200",
+              checked ? "translate-x-4.5" : "translate-x-0.75"
+            )}
+          />
+        </Switch>
+      </div>
     </Switch.Group>
   );
 }

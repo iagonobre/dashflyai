@@ -12,18 +12,18 @@ export function useConversations(storeId: string | null, status?: ConversationSt
   });
 }
 
-export function useConversation(id: string | null) {
+export function useConversation(storeId: string | null, id: string | null) {
   return useQuery({
-    queryKey: ["conversation", id],
-    queryFn: () => conversationsService.getById(id!),
-    enabled: !!id,
+    queryKey: ["conversation", storeId, id],
+    queryFn: () => conversationsService.getById(storeId!, id!),
+    enabled: !!storeId && !!id,
   });
 }
 
-export function useApproveConversation() {
+export function useApproveConversation(storeId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => conversationsService.approve(id),
+    mutationFn: (id: string) => conversationsService.approve(storeId!, id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
       toast.success("Resposta aprovada e enviada.");
@@ -32,10 +32,10 @@ export function useApproveConversation() {
   });
 }
 
-export function useRejectConversation() {
+export function useRejectConversation(storeId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => conversationsService.reject(id),
+    mutationFn: (id: string) => conversationsService.reject(storeId!, id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
       toast.success("Resposta rejeitada.");
@@ -44,11 +44,11 @@ export function useRejectConversation() {
   });
 }
 
-export function useEditAndApprove() {
+export function useEditAndApprove(storeId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, content }: { id: string; content: string }) =>
-      conversationsService.editAndApprove(id, content),
+      conversationsService.editAndApprove(storeId!, id, content),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
       toast.success("Resposta editada e enviada.");

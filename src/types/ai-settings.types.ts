@@ -55,6 +55,15 @@ export type AiSettings = {
     inactivityDays: number;
   };
 
+  // Delay de resposta
+  replyDelay: {
+    enabled: boolean;
+    mode: "fixed" | "random";
+    fixedMinutes: number;
+    minMinutes: number;
+    maxMinutes: number;
+  } | null;
+
   // Textos customizados
   exchangePolicy: string | null;
   shippingPolicy: string | null;

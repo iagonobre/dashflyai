@@ -124,7 +124,7 @@ export default function DnsSettingsSection({
             <span className="text-darkText">Seus registros MX não precisam ser alterados.</span>
           </p>
           {checkedAt && (
-            <p className="text-darkText text-xs mt-0.5">
+            <p className="text-darkText text-sm mt-0.5">
               Última verificação: {new Date(checkedAt).toLocaleString("pt-BR")}
             </p>
           )}

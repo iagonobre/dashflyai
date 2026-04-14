@@ -11,9 +11,10 @@ interface Props {
   onToggle: (data: Partial<AiSettings>) => void;
   onSave: (data: Partial<AiSettings>) => void;
   isSaving: boolean;
+  spfNotVerified?: boolean;
 }
 
-export default function ReengagementForm({ settings, onToggle, onSave, isSaving }: Props) {
+export default function ReengagementForm({ settings, onToggle, onSave, isSaving, spfNotVerified = false }: Props) {
   const re = settings.reengagement ?? { enabled: false, inactivityDays: 30 };
   const [days, setDays] = useState<number>(re.inactivityDays);
   const isDirty = days !== re.inactivityDays;
@@ -32,6 +33,8 @@ export default function ReengagementForm({ settings, onToggle, onSave, isSaving 
         }
         label="Reativar clientes que sumiram"
         description="O assistente envia um email carinhoso para clientes que não compram há algum tempo, convidando-os a voltar."
+        warning={spfNotVerified ? "Domínio não verificado" : undefined}
+        disabled={spfNotVerified}
       />
 
       {re.enabled && (

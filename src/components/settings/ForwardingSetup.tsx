@@ -223,11 +223,11 @@ export default function ForwardingSetup({
               <p className="text-yellowAlert text-xs font-medium">Email de verificação recebido do seu provedor</p>
             </div>
             <div className="px-4 py-2.5 border-b border-yellowAlert/10">
-              <p className="text-darkText text-[11px] uppercase tracking-wider mb-0.5">Assunto</p>
+              <p className="text-darkText text-xs uppercase tracking-wider mb-0.5">Assunto</p>
               <p className="text-textLight text-sm">{providerVerificationSubject}</p>
             </div>
             <div className="px-4 py-2.5">
-              <p className="text-darkText text-[11px] uppercase tracking-wider mb-1.5">Conteúdo</p>
+              <p className="text-darkText text-xs uppercase tracking-wider mb-1.5">Conteúdo</p>
               {providerVerificationHtml ? (
                 <iframe
                   srcDoc={providerVerificationHtml}
@@ -463,15 +463,15 @@ export default function ForwardingSetup({
                 <ol className="flex flex-col gap-1.5">
                   {activeGuide.steps.map((step, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="text-lightPrimary text-xs font-mono shrink-0 mt-0.5 w-4">
+                      <span className="text-lightPrimary text-sm font-mono shrink-0 mt-0.5 w-4">
                         {i + 1}.
                       </span>
-                      <span className="text-darkText text-xs leading-relaxed">{step}</span>
+                      <span className="text-darkText text-sm leading-relaxed">{step}</span>
                     </li>
                   ))}
                 </ol>
                 {activeGuide.note && (
-                  <p className="text-yellowAlert/80 text-xs leading-relaxed mt-0.5">
+                  <p className="text-yellowAlert/80 text-sm leading-relaxed mt-0.5">
                     ⚠ {activeGuide.note}
                   </p>
                 )}
@@ -483,8 +483,8 @@ export default function ForwardingSetup({
               <div className="px-4 py-3 border-t border-border flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0 animate-pulse" />
                 <div>
-                  <p className="text-textLight text-xs font-medium">Aguardando email de verificação</p>
-                  <p className="text-darkText text-xs mt-0.5 leading-relaxed">
+                  <p className="text-textLight text-sm font-medium">Aguardando email de verificação</p>
+                  <p className="text-darkText text-sm mt-0.5 leading-relaxed">
                     Após colar o endereço no seu provedor, ele enviará um email com um código para cá.
                     Ele aparecerá aqui automaticamente — não precisa sair desta página.
                   </p>
@@ -500,11 +500,11 @@ export default function ForwardingSetup({
                   <p className="text-yellowAlert text-xs font-medium">Email de verificação recebido — siga as instruções abaixo</p>
                 </div>
                 <div className="px-4 py-2 border-b border-yellowAlert/10">
-                  <p className="text-darkText text-[10px] uppercase tracking-wider mb-0.5">Assunto</p>
+                  <p className="text-darkText text-xs uppercase tracking-wider mb-0.5">Assunto</p>
                   <p className="text-textLight text-xs">{providerVerificationSubject}</p>
                 </div>
                 <div className="px-4 py-2.5">
-                  <p className="text-darkText text-[10px] uppercase tracking-wider mb-1.5">Conteúdo</p>
+                  <p className="text-darkText text-xs uppercase tracking-wider mb-1.5">Conteúdo</p>
                   {providerVerificationHtml ? (
                     <iframe
                       srcDoc={providerVerificationHtml}
@@ -526,7 +526,7 @@ export default function ForwardingSetup({
                   )}
                 </div>
                 <div className="px-4 py-2.5 border-t border-yellowAlert/10 flex items-center justify-between gap-3">
-                  <p className="text-darkText text-xs leading-relaxed">
+                  <p className="text-darkText text-sm leading-relaxed">
                     Copie o código ou clique no link acima, conclua no painel do seu provedor e depois clique em verificar.
                   </p>
                   <button
@@ -554,7 +554,7 @@ export default function ForwardingSetup({
       </div>
 
       {/* Rodapé */}
-      <p className="text-darkText text-xs pt-1">
+      <p className="text-darkText text-sm pt-1">
         Após configurar, a Dashfly detecta o encaminhamento automaticamente em até 2 minutos.
       </p>
 

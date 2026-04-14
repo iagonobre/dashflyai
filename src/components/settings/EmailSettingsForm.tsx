@@ -22,9 +22,10 @@ interface Props {
   onSave: (data: Partial<AiSettings>) => void;
   onToggle: (data: Partial<AiSettings>) => void;
   isSaving: boolean;
+  spfNotVerified?: boolean;
 }
 
-export default function EmailSettingsForm({ settings, onSave, onToggle, isSaving }: Props) {
+export default function EmailSettingsForm({ settings, onSave, onToggle, isSaving, spfNotVerified = false }: Props) {
   const {
     register,
     handleSubmit,
@@ -63,6 +64,8 @@ export default function EmailSettingsForm({ settings, onSave, onToggle, isSaving
             onChange={(checked) => onToggle({ emailResponseActive: checked })}
             label="Responder emails automaticamente"
             description="O assistente lê os emails dos seus clientes e responde sozinho, sem precisar da sua intervenção."
+            warning={spfNotVerified ? "Domínio não verificado" : undefined}
+            disabled={spfNotVerified}
           />
         </div>
         <div className="py-4">
@@ -71,6 +74,8 @@ export default function EmailSettingsForm({ settings, onSave, onToggle, isSaving
             onChange={(checked) => onToggle({ emailRequireApproval: checked })}
             label="Revisar antes de enviar"
             description="Você revisa e aprova cada resposta antes que ela seja enviada ao cliente. Recomendado para quem está começando."
+            warning={spfNotVerified ? "Domínio não verificado" : undefined}
+            disabled={spfNotVerified}
           />
         </div>
         <div className="py-4">
@@ -112,7 +117,7 @@ export default function EmailSettingsForm({ settings, onSave, onToggle, isSaving
         <button
           type="submit"
           disabled={isSaving || !isDirty}
-          className="px-5 py-2 text-sm font-medium text-white bg-primary hover:bg-primaryHover
+          className="px-5 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primaryHover
             rounded-lg transition-colors flex items-center gap-2 disabled:opacity-60"
         >
           {isSaving ? <Spinner size="sm" /> : "Salvar"}
