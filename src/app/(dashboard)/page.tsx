@@ -91,7 +91,7 @@ export default function OverviewPage() {
   const { data: stats, isLoading: loadingStats } = useAutomationStats(storeId);
   const { data: pending, isLoading: loadingPending } = useConversations(
     storeId,
-    "pending_manual_review"
+    "PENDING_MANUAL_REVIEW"
   );
   const { data: inboundEmails = [] } = useInboundEmails(storeId);
 
