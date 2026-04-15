@@ -8,7 +8,7 @@ import SubscriptionBanner from "./SubscriptionBanner";
 
 export default function SubscriptionBannerWrapper() {
   const { storeId, loading: authLoading } = useAuth();
-  const { data: subscription, isLoading } = useAiSubscription(storeId);
+  const { data: subscription, isLoading } = useAiSubscription();
   const pathname = usePathname();
   const router = useRouter();
 

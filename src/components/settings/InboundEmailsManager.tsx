@@ -40,6 +40,8 @@ interface Props {
   isForwardingConnecting?: boolean;
   isSendingVerification?: boolean;
   maxEmails?: number;
+  /** Total inbound emails used across ALL stores of the user (user-level quota). */
+  totalUsedAcrossStores?: number;
   hideForwardingStatus?: boolean;
 }
 
@@ -92,8 +94,12 @@ export default function InboundEmailsManager({
   isForwardingConnecting = false,
   isSendingVerification = false,
   maxEmails = 1,
+  totalUsedAcrossStores,
   hideForwardingStatus = false,
 }: Props) {
+  // Use cross-store total for quota check if provided, otherwise fall back to local count
+  const globalUsed = totalUsedAcrossStores ?? emails.length;
+  const canAddMore = globalUsed < maxEmails;
   const [showForm, setShowForm] = useState(defaultFormOpen);
 
   const {
@@ -228,7 +234,7 @@ export default function InboundEmailsManager({
                 </div>
               ))}
 
-              {emails.length < maxEmails && (
+              {canAddMore ? (
                 <button
                   onClick={() => setShowForm(!showForm)}
                   className="flex items-center gap-2 text-sm text-darkText hover:text-white
@@ -237,6 +243,10 @@ export default function InboundEmailsManager({
                   <HugeiconsIcon icon={Add01Icon} size={14} />
                   Adicionar outro email
                 </button>
+              ) : (
+                <p className="text-darkText text-xs">
+                  {globalUsed}/{maxEmails} {maxEmails === 1 ? "email" : "emails"} usados no plano. Faça upgrade para adicionar mais.
+                </p>
               )}
             </div>
           )}

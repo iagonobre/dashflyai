@@ -29,7 +29,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { openSidebar, setOpenSidebar } = useHeaderConfig();
   const { storeId } = useAuth();
-  const { data: subscription } = useAiSubscription(storeId);
+  const { data: subscription } = useAiSubscription();
   const { data: stats } = useAutomationStats(storeId);
 
   const emailsUsed = stats?.emailsProcessedMonth ?? 0;

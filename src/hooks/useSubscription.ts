@@ -9,21 +9,20 @@ export function useAiPlans() {
   });
 }
 
-export function useAiSubscription(storeId: string | null) {
+export function useAiSubscription() {
   return useQuery({
-    queryKey: ["ai-subscription", storeId],
-    queryFn: () => subscriptionService.getSubscription(storeId!),
-    enabled: !!storeId,
+    queryKey: ["ai-subscription"],
+    queryFn: () => subscriptionService.getSubscription(),
   });
 }
 
-export function useSubscribeAi(storeId: string | null) {
+export function useSubscribeAi() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (planId: string) => subscriptionService.subscribe(storeId!, planId),
+    mutationFn: (planId: string) => subscriptionService.subscribe(planId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ai-subscription", storeId] });
+      queryClient.invalidateQueries({ queryKey: ["ai-subscription"] });
     },
     onError: () => {
       toast.error("Erro ao iniciar o trial. Tente novamente.");
@@ -31,13 +30,13 @@ export function useSubscribeAi(storeId: string | null) {
   });
 }
 
-export function useCancelAiSubscription(storeId: string | null) {
+export function useCancelAiSubscription() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => subscriptionService.cancel(storeId!),
+    mutationFn: () => subscriptionService.cancel(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ai-subscription", storeId] });
+      queryClient.invalidateQueries({ queryKey: ["ai-subscription"] });
       toast.success("Assinatura cancelada.");
     },
     onError: () => {

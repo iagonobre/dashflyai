@@ -87,7 +87,7 @@ function SettingsPage() {
 
   const { data: settings, isLoading, isError } = useAiSettings(storeId);
   const updateSettings = useUpdateAiSettings(storeId);
-  const { data: subscription } = useAiSubscription(storeId);
+  const { data: subscription } = useAiSubscription();
 
   const {
     data: inboundEmails = [],
@@ -279,6 +279,7 @@ function SettingsPage() {
                 isForwardingConnecting={initForwarding.isPending}
                 isSendingVerification={sendVerification.isPending}
                 maxEmails={subscription?.plan.inboundEmailsLimit ?? 1}
+                totalUsedAcrossStores={subscription?.totalInboundEmailsUsed ?? inboundEmails.length}
               />
             )}
 

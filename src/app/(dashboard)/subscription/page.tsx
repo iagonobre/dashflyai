@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@/contexts/AuthContext";
 import { useAiPlans, useAiSubscription, useSubscribeAi, useCancelAiSubscription } from "@/hooks/useSubscription";
 import PlanCard from "@/components/subscription/PlanCard";
 import Spinner from "@/components/ui/Spinner";
@@ -10,12 +9,11 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export default function SubscriptionPage() {
-  const { storeId } = useAuth();
 
   const { data: plans = [], isLoading: loadingPlans } = useAiPlans();
-  const { data: subscription, isLoading: loadingSub } = useAiSubscription(storeId);
-  const subscribe = useSubscribeAi(storeId);
-  const cancel = useCancelAiSubscription(storeId);
+  const { data: subscription, isLoading: loadingSub } = useAiSubscription();
+  const subscribe = useSubscribeAi();
+  const cancel = useCancelAiSubscription();
 
   const isLoading = loadingPlans || loadingSub;
 

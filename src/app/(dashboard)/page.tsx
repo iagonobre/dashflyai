@@ -385,30 +385,6 @@ export default function OverviewPage() {
         )}
       </div>
 
-      {/* Seção: Disputas abertas */}
-      {(stats?.openDisputesCount ?? 0) > 0 && (
-        <Link
-          href="/automations"
-          className="bg-redAlert/8 border border-redAlert/30 rounded-xl p-5
-            flex items-center justify-between gap-4 hover:bg-redAlert/12 transition-colors"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-redAlert/10 border border-redAlert/30 flex items-center justify-center shrink-0">
-              <HugeiconsIcon icon={ShieldAlert} size={20} className="text-redAlert" />
-            </div>
-            <div>
-              <p className="text-white font-medium text-sm">
-                {stats?.openDisputesCount}{" "}
-                {stats?.openDisputesCount === 1 ? "disputa aberta" : "disputas abertas"}
-              </p>
-              <p className="text-darkText text-xs mt-0.5">
-                A Dashfly AI gerou rascunhos de contestação para sua revisão.
-              </p>
-            </div>
-          </div>
-          <HugeiconsIcon icon={ArrowRight01Icon} size={18} className="text-darkText shrink-0" />
-        </Link>
-      )}
     </div>
   );
 }

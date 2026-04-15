@@ -30,10 +30,6 @@ const featureLines = (plan: AiPlan) => [
     enabled: plan.automationsEnabled,
   },
   {
-    label: "Alertas de chargeback",
-    enabled: plan.disputeAlertsEnabled,
-  },
-  {
     label: "Integração Dashfly Analytics",
     enabled: plan.dashflyIntegrationEnabled,
   },
