@@ -87,7 +87,6 @@ function PlanOption({
   const features = [
     { label: "Email automático", enabled: plan.emailResponseEnabled },
     { label: "Automações (carrinho, pós-compra)", enabled: plan.automationsEnabled },
-    { label: "Alertas de chargeback", enabled: plan.disputeAlertsEnabled },
     { label: `${plan.emailsPerMonthLimit} emails/mês`, enabled: true },
   ];
 
@@ -151,14 +150,14 @@ export default function OnboardingPage() {
 
   const activeStores = (user?.stores ?? []).filter((s) => s.status !== "DISCONNECTED");
 
-  const { data: subscription, isLoading: loadingSubscription } = useAiSubscription(storeId);
+  const { data: subscription, isLoading: loadingSubscription } = useAiSubscription();
   const { data: settings, isLoading: loadingSettings } = useAiSettings(storeId);
   const updateSettings = useUpdateAiSettings(storeId);
   const { data: inboundEmails = [], isLoading: loadingEmails } = useInboundEmails(storeId);
   const addEmail = useAddInboundEmail(storeId);
   const deleteEmail = useDeleteInboundEmail(storeId);
   const { data: plans = [], isLoading: loadingPlans } = useAiPlans();
-  const subscribe = useSubscribeAi(storeId);
+  const subscribe = useSubscribeAi();
   const activateAi = useActivateAi(storeId);
   const initForwarding = useInitForwarding(storeId);
   const sendVerification = useSendForwardingVerification(storeId);
@@ -307,9 +306,17 @@ export default function OnboardingPage() {
 
   // Store selection — always shown at onboarding entry so user knows which store is being configured
   if (user && !storeConfirmed) {
-    const emailLimit = subscription?.plan.inboundEmailsLimit ?? 1;
-    const emailsUsed = inboundEmails.length;
-    const atLimit = emailsUsed >= emailLimit;
+    const emailLimit = subscription?.plan?.inboundEmailsLimit ?? 1;
+    // Use cross-store total from subscription (user-level quota)
+    const totalEmailsUsed = subscription?.totalInboundEmailsUsed ?? inboundEmails.length;
+    const atLimit = totalEmailsUsed >= emailLimit && !!subscription;
+
+    // Find a store that's already configured (has inbound emails active) and is not the current one
+    // We detect this via `storeConfirmed` flow: if user has a subscription and the current store isn't new
+    // Simple heuristic: any store that isn't the current one might be configured
+    const otherConfiguredStore = atLimit && activeStores.length > 1
+      ? activeStores.find((s) => s.id !== storeId) ?? null
+      : null;
 
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
@@ -330,6 +337,24 @@ export default function OnboardingPage() {
                 : "Escolha a loja que o assistente vai atender. Você pode configurar as demais depois."}
             </p>
           </div>
+
+          {/* Uso total do plano */}
+          {!loadingSubscription && subscription && (
+            <div className="flex items-center gap-2">
+              <span className={cn(
+                "text-xs px-2.5 py-1 rounded-full border",
+                atLimit
+                  ? "bg-yellowAlert/10 border-yellowAlert/30 text-yellowAlert"
+                  : "bg-primary/10 border-primaryStroke/30 text-lightPrimary"
+              )}>
+                {totalEmailsUsed}/{emailLimit} {emailLimit === 1 ? "email" : "emails"} usados no plano
+              </span>
+              {atLimit && (
+                <span className="text-yellowAlert text-xs font-medium">Limite atingido</span>
+              )}
+            </div>
+          )}
+
           <div className="flex flex-col gap-2">
             {activeStores.map((store) => {
               const isSelected = store.id === storeId;
@@ -351,33 +376,29 @@ export default function OnboardingPage() {
                   {store.url && (
                     <p className="text-darkText text-xs mt-0.5">{store.url}</p>
                   )}
-                  {isSelected && !loadingSubscription && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className={cn(
-                        "text-xs px-2 py-0.5 rounded-full border",
-                        atLimit
-                          ? "bg-yellowAlert/10 border-yellowAlert/30 text-yellowAlert"
-                          : "bg-primary/10 border-primaryStroke/30 text-lightPrimary"
-                      )}>
-                        {emailsUsed}/{emailLimit} {emailLimit === 1 ? "email" : "emails"} usados
-                      </span>
-                      {atLimit && (
-                        <span className="text-yellowAlert text-xs">Limite atingido</span>
-                      )}
-                    </div>
-                  )}
                 </button>
               );
             })}
           </div>
 
           {/* Aviso de limite atingido */}
-          {storeId && atLimit && !loadingSubscription && (
-            <div className="bg-yellowAlert/8 border border-yellowAlert/30 rounded-lg px-4 py-3">
+          {atLimit && !loadingSubscription && (
+            <div className="bg-yellowAlert/8 border border-yellowAlert/30 rounded-lg px-4 py-3 flex flex-col gap-2">
               <p className="text-yellowAlert text-xs leading-relaxed">
-                Esta loja já atingiu o limite de {emailLimit} {emailLimit === 1 ? "email" : "emails"} do plano atual.
-                Para adicionar mais emails, faça upgrade do plano.
+                Você já configurou {totalEmailsUsed} de {emailLimit} {emailLimit === 1 ? "email" : "emails"} permitidos no seu plano.
+                Para configurar outra loja, faça upgrade ou remova um email existente.
               </p>
+              {otherConfiguredStore && (
+                <button
+                  onClick={() => {
+                    setStoreId(otherConfiguredStore.id);
+                    router.push("/");
+                  }}
+                  className="text-yellowAlert text-xs underline text-left hover:opacity-80"
+                >
+                  Voltar para loja configurada ({otherConfiguredStore.name})
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -518,6 +539,7 @@ export default function OnboardingPage() {
                 defaultFormOpen
                 hideForwardingStatus
                 maxEmails={subscription?.plan.inboundEmailsLimit ?? 1}
+                totalUsedAcrossStores={subscription?.totalInboundEmailsUsed ?? inboundEmails.length}
               />
 
               <div className="flex items-center justify-between pt-2">

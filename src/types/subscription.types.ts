@@ -11,15 +11,14 @@ export type AiPlan = {
   automationsEnabled: boolean;
   automationJobsPerMonth: number;
   maxCartAttempts: number;
-  disputeAlertsEnabled: boolean;
   dashflyIntegrationEnabled: boolean;
 };
 
 export type AiSubscriptionStatus = "ACTIVE" | "TRIAL" | "CANCELED" | "OVERDUE" | "PENDING";
 
-export type AiStoreSubscription = {
+export type AiSubscription = {
   id: string;
-  storeId: string;
+  userId: string;
   plan: AiPlan;
   status: AiSubscriptionStatus;
   currentPeriodEnd: string;
@@ -27,8 +26,12 @@ export type AiStoreSubscription = {
   emailsUsedThisMonth: number;
   conversationsUsedThisMonth: number;
   automationJobsUsedThisMonth: number;
+  totalInboundEmailsUsed: number;
   createdAt: string;
 };
+
+/** @deprecated Use AiSubscription instead */
+export type AiStoreSubscription = AiSubscription;
 
 export type StartTrialResponse = {
   trialDays: number;

@@ -1,5 +1,5 @@
 import api from "./api";
-import { AiPlan, AiStoreSubscription, StartTrialResponse } from "@/types/subscription.types";
+import { AiPlan, AiSubscription, StartTrialResponse } from "@/types/subscription.types";
 
 export const subscriptionService = {
   getPlans: async (): Promise<AiPlan[]> => {
@@ -7,22 +7,22 @@ export const subscriptionService = {
     return res.data;
   },
 
-  getSubscription: async (storeId: string): Promise<AiStoreSubscription | null> => {
+  getSubscription: async (): Promise<AiSubscription | null> => {
     try {
-      const res = await api.get(`/stores/${storeId}/ai/subscription`);
+      const res = await api.get("/ai/subscription");
       return res.data ?? null;
     } catch {
-      // 403/404 = no active AI subscription for this store
+      // 403/404 = no active AI subscription for this user
       return null;
     }
   },
 
-  subscribe: async (storeId: string, planId: string): Promise<StartTrialResponse> => {
-    const res = await api.post(`/stores/${storeId}/ai/subscribe`, { aiPlanId: planId });
+  subscribe: async (planId: string): Promise<StartTrialResponse> => {
+    const res = await api.post("/ai/subscribe", { aiPlanId: planId });
     return res.data;
   },
 
-  cancel: async (storeId: string): Promise<void> => {
-    await api.delete(`/stores/${storeId}/ai/cancel`);
+  cancel: async (): Promise<void> => {
+    await api.delete("/ai/subscription");
   },
 };

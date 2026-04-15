@@ -29,37 +29,3 @@ export function useRemoveUnsubscribe(storeId: string | null) {
     onError: () => toast.error("Erro ao remover. Tente novamente."),
   });
 }
-
-export function useDisputeDrafts(storeId: string | null) {
-  return useQuery({
-    queryKey: ["dispute-drafts", storeId],
-    queryFn: () => automationsService.listDisputeDrafts(storeId!),
-    enabled: !!storeId,
-  });
-}
-
-export function useUpdateDisputeDraft() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, content }: { id: string; content: string }) =>
-      automationsService.updateDisputeDraft(id, content),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["dispute-drafts"] });
-      toast.success("Rascunho salvo.");
-    },
-    onError: () => toast.error("Erro ao salvar. Tente novamente."),
-  });
-}
-
-export function useDismissDisputeDraft() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: "submitted" | "dismissed" }) =>
-      automationsService.dismissDisputeDraft(id, status),
-    onSuccess: (_, { status }) => {
-      queryClient.invalidateQueries({ queryKey: ["dispute-drafts"] });
-      toast.success(status === "submitted" ? "Marcado como submetido." : "Alerta descartado.");
-    },
-    onError: () => toast.error("Erro ao atualizar. Tente novamente."),
-  });
-}
